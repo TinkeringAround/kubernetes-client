@@ -1,0 +1,56 @@
+{
+  "name": "electron-app",
+  "version": "0.1.0",
+  "description": "Electron App",
+  "author": "Thomas Maier",
+  "build": {
+    "appId": "<com.electronapp>"
+  },
+  "main": "public/electron.js",
+  "homepage": "./",
+  "private": true,
+  "dependencies": {
+    "electron": "^7.1.2",
+    "electron-is-dev": "^1.1.0",
+    "kubernetes-client": "^8.3.6",
+    "node-cmd": "^3.0.0",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "devDependencies": {
+    "@types/jest": "24.0.23",
+    "@types/node": "12.12.16",
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "16.9.4",
+    "concurrently": "^5.0.0",
+    "cross-env": "^6.0.3",
+    "electron-builder": "^21.2.0",
+    "react-scripts": "3.3.0",
+    "typescript": "3.7.3",
+    "wait-on": "^3.3.0"
+  },
+  "scripts": {
+    "build": "yarn react-build && yarn electron-build",
+    "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-build": "electron-builder",
+    "release": "yarn react-build && electron-builder --publish=always",
+    "react-start": "react-scripts start",
+    "react-build": "react-scripts build",
+    "react-test": "react-scripts test"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

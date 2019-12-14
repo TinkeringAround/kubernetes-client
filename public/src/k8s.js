@@ -6,22 +6,47 @@ const Request = require('kubernetes-client/backends/request')
 const { logError } = require('./logger')
 
 // ==============================================================
-let client
+let client, kubeconfig
 
 // ==============================================================
-function portForwardToService(event, service, servicePort, targetPort) {
+function getContexts(event) {
   try {
-    var cmd = require('node-cmd')
-    const command = `kubectl port-forward svc/${service} ${targetPort}:${servicePort}`
-    cmd.run(command)
     event.returnValue = {
-      data: {},
+      data: {
+        activeContext: kubeconfig.currentContext,
+        contexts: kubeconfig.contexts.map(context => context.name)
+      },
       error: null
     }
   } catch (error) {
     logError(error)
     event.returnValue = {
-      data: {},
+      data: null,
+      error: error
+    }
+  }
+}
+
+async function getNodes(event) {
+  try {
+    const nodes = await client.api.v1.nodes.get()
+    event.returnValue = {
+      data: nodes.body.items.map(node => {
+        return {
+          name: node.metadata.name,
+          addresses: node.status.addresses,
+          allocatable: node.status.allocatable,
+          capacity: node.status.capacity,
+          conditions: node.status.conditions, // TODO: Auswerten und true oder false zurückgeben
+          nodeInfo: node.status.nodeInfo
+        }
+      }),
+      error: null
+    }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
       error: error
     }
   }
@@ -37,7 +62,7 @@ async function getNamespaces(event) {
   } catch (error) {
     logError(error)
     event.returnValue = {
-      data: {},
+      data: null,
       error: error
     }
   }
@@ -53,7 +78,7 @@ async function getDeploymentsInNamespace(event, namespace) {
   } catch (error) {
     logError(error)
     event.returnValue = {
-      data: {},
+      data: null,
       error: error
     }
   }
@@ -69,7 +94,25 @@ async function getServicesInNamespace(event, namespace) {
   } catch (error) {
     logError(error)
     event.returnValue = {
+      data: null,
+      error: error
+    }
+  }
+}
+
+function portForwardToService(event, service, servicePort, targetPort) {
+  try {
+    var cmd = require('node-cmd')
+    const command = `kubectl port-forward svc/${service} ${targetPort}:${servicePort}`
+    cmd.run(command)
+    event.returnValue = {
       data: {},
+      error: null
+    }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
       error: error
     }
   }
@@ -78,7 +121,7 @@ async function getServicesInNamespace(event, namespace) {
 // ==============================================================
 ;(async () => {
   try {
-    const kubeconfig = new KubeConfig()
+    kubeconfig = new KubeConfig()
     kubeconfig.loadFromFile(app.getPath('home') + '/.kube/config')
 
     const backend = new Request({ kubeconfig })
@@ -91,6 +134,8 @@ async function getServicesInNamespace(event, namespace) {
 })()
 
 // ==============================================================
+ipcMain.on('clusters', getContexts)
+ipcMain.on('nodes', getNodes)
 ipcMain.on('namespaces', getNamespaces)
 ipcMain.on('deployments', getDeploymentsInNamespace)
 ipcMain.on('services', getServicesInNamespace)

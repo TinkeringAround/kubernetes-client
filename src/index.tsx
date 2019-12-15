@@ -8,7 +8,6 @@ import './styles/global.css'
 // Components
 import Layout from './components/layout'
 import Dashboard from './components/dashboard'
-import Navigation from './components/navigation'
 
 // Driver
 import { getContexts, getNodes } from './driver/ipc'
@@ -37,7 +36,6 @@ const App: FC = () => {
 
   return (
     <Layout>
-      <Navigation />
       <Dashboard />
     </Layout>
   )

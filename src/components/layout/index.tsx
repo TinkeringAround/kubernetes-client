@@ -1,10 +1,7 @@
 import React, { FC } from 'react'
 
-// Assets
-import noise from '../../assets/noise.png'
-
-// Styles
-import { colors } from '../../styles/'
+// Components
+import Navigation from '../navigation/'
 
 // ==========================================================
 const Layout: FC = ({ children }) => (
@@ -13,15 +10,12 @@ const Layout: FC = ({ children }) => (
       width: '100vw',
       height: '100vh',
 
-      background: colors['lightgrey'],
-      backgroundImage: `url(${noise})`,
-      backgroundPosition: '50%',
-
       display: 'flex',
       flexDirection: 'row'
     }}
   >
-    {children}
+    <Navigation />
+    <div style={{ height: '100%', width: 'calc(100% - 60px)' }}>{children}</div>
   </div>
 )
 

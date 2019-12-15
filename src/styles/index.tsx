@@ -1,7 +1,7 @@
 export type TColor = 'lightgrey' | 'organe' | 'yellow' | 'green' | 'blue' | 'darkBlue'
 
 export const colors = {
-  lightgrey: 'rgb(250,250,250)',
+  lightgrey: 'rgb(230,230,230)',
 
   orange: 'rgba(247, 146, 86, 1)',
   yellow: 'rgba(251, 209, 162, 1)',

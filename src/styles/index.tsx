@@ -9,3 +9,8 @@ export const colors = {
   blue: 'rgba(50, 120, 225, 1)',
   darkBlue: 'rgba(29, 78, 137, 1)'
 }
+
+// ==========================================================
+export const sizes = {
+  navigation: 70
+}

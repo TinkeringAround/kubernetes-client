@@ -1,28 +1,32 @@
-import React, { FC } from 'react'
+import React, { FC, useContext } from 'react'
 
 // Styles
-import { colors } from '../../styles'
+import { colors, sizes } from '../../styles'
+
+// Context
+import { AppContext } from '../../context'
 
 // Atoms
 import Icon from '../../atoms/icons'
 
-// ==========================================================
-interface Props {}
+// Components
+import Logo from '../logo'
 
 // ==========================================================
-const Navigation: FC<Props> = () => {
+const Navigation: FC = () => {
+  const { page, setPage } = useContext(AppContext)
+
   return (
     <div
       style={{
-        width: 60,
+        width: sizes['navigation'],
         height: '100%',
 
         background: 'white',
-        borderRight: 'solid 2px ' + colors['lightgrey'],
+        borderRight: 'solid 4px ' + colors['lightgrey'],
 
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'center'
       }}
     >
@@ -31,14 +35,16 @@ const Navigation: FC<Props> = () => {
           height: '50%',
           width: '100%',
 
+          marginTop: '1rem',
+
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
         }}
       >
-        <Icon type="server" color="blue" margin="0 0 .75rem" />
-        <Icon type="service" color="blue" margin="0 0 .75rem" />
-        <Icon type="pod" color="blue" />
+        <Logo />
+        <Icon type="home" selected={page === 0} margin="5rem 0 .75rem" onClick={() => setPage(0)} />
+        <Icon type="service" selected={page === 1} margin="0 0 .75rem" onClick={() => setPage(1)} />
       </div>
     </div>
   )

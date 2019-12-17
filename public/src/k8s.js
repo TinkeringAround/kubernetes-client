@@ -32,13 +32,44 @@ async function getNodes(event) {
     const nodes = await client.api.v1.nodes.get()
     event.returnValue = {
       data: nodes.body.items.map(node => {
+        let errors = []
+
+        node.status.conditions.forEach(condition => {
+          try {
+            if (condition.type != 'Ready' && !condition.status) errors.push(condition.message)
+          } catch (error) {
+            logError(error)
+          }
+        })
+
+        let aCPU = parseInt(node.status.allocatable.cpu.match(/\d/g).join(''), 10).toFixed()
+        let cCPU = parseInt(node.status.capacity.cpu.match(/\d/g).join(''), 10).toFixed()
+
         return {
           name: node.metadata.name,
-          addresses: node.status.addresses,
-          allocatable: node.status.allocatable,
-          capacity: node.status.capacity,
-          conditions: node.status.conditions, // TODO: Auswerten und true oder false zurückgeben
-          nodeInfo: node.status.nodeInfo
+          allocatable: {
+            cpu: aCPU < 10 ? aCPU * 1000 : aCPU,
+            memory: (
+              parseInt(node.status.allocatable.memory.match(/\d/g).join(''), 10) / 1000
+            ).toFixed()
+          },
+          capacity: {
+            cpu: cCPU < 10 ? cCPU * 1000 : cCPU,
+            memory: (
+              parseInt(node.status.capacity.memory.match(/\d/g).join(''), 10) / 1000
+            ).toFixed()
+          },
+          conditions: {
+            status: errors.length === 0,
+            errors: errors
+          },
+          nodeInfo: {
+            architecture: node.status.nodeInfo.architecture,
+            containerRuntimeVersion: node.status.nodeInfo.containerRuntimeVersion,
+            osImage: node.status.nodeInfo.osImage,
+            kubeletVersion: node.status.nodeInfo.kubeletVersion,
+            kernelVersion: node.status.nodeInfo.kernelVersion
+          }
         }
       }),
       error: null

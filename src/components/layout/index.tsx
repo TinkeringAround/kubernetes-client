@@ -1,5 +1,8 @@
 import React, { FC } from 'react'
 
+// Styles
+import { sizes } from '../../styles'
+
 // Components
 import Navigation from '../navigation/'
 
@@ -15,7 +18,9 @@ const Layout: FC = ({ children }) => (
     }}
   >
     <Navigation />
-    <div style={{ height: '100%', width: 'calc(100% - 60px)' }}>{children}</div>
+    <div style={{ height: '100vh', width: `calc(100vw - ${sizes['navigation']}px)` }}>
+      {children}
+    </div>
   </div>
 )
 

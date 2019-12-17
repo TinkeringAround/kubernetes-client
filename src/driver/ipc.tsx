@@ -1,25 +1,37 @@
 // Types
-import { TResponse, TContexts } from '../types'
+import { TResponse, TContexts, TError, TNodes } from '../types'
 
 // Consts
 const { ipcRenderer } = window.electron
 
 // ==========================================================
-export const getContexts: () => TContexts | null = () => {
+export const getContexts: () => TContexts | TError = () => {
   const response: TResponse = ipcRenderer.sendSync('clusters')
+  console.info('Contexts: ', response.data)
 
-  if (response.error) console.error(response.error)
-  else if (response.data) return response.data as TContexts
-
-  return null
+  if (response.data) return response.data as TContexts
+  else {
+    console.error(response.error)
+    return {
+      message: 'An unexpected error occured.',
+      error: response.error ? response.error : 'Unkown Error.'
+    }
+  }
 }
 
-export const getNodes: () => object | null = () => {
+// ==========================================================
+export const getNodes: () => TNodes | TError = () => {
   const response: TResponse = ipcRenderer.sendSync('nodes')
-  console.log('Nodes: ', response.data)
+  console.info('Nodes: ', response.data)
 
-  if (response.error) console.error(response.error)
-  else if (response.data) return response.data
-
-  return null
+  if (response.data) return response.data as TNodes
+  else {
+    console.error(response.error)
+    return {
+      message: 'An unexpected error occured.',
+      error: response.error ? response.error : 'Unkown Error.'
+    }
+  }
 }
+
+// ==========================================================

@@ -10,6 +10,7 @@
   "homepage": "./",
   "private": true,
   "dependencies": {
+    "@nivo/pie": "^0.60.0",
     "electron": "^7.1.2",
     "electron-is-dev": "^1.1.0",
     "kubernetes-client": "^8.3.6",

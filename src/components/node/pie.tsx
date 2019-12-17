@@ -1,14 +1,15 @@
-import React, { FC, useState, useEffect } from 'react'
+import React, { FC } from 'react'
 import { ResponsivePie } from '@nivo/pie'
 
 // Styles
 import { colors } from '../../styles'
 
 // Types
-import { TPieMode, TNode } from '../../types'
+import { TNode } from '../../types'
+type TNodeSpec = 'cpu' | 'memory'
 
 // Dummy Data
-const getData = (mode: TPieMode, node: TNode) => {
+const getData = (mode: TNodeSpec, node: TNode) => {
   const data = [
     {
       id: mode === 'cpu' ? 'Allocatable CPU' : 'Allocatable Memory',
@@ -26,6 +27,7 @@ const getData = (mode: TPieMode, node: TNode) => {
   ]
   return data
 }
+const modes: Array<TNodeSpec> = ['cpu', 'memory']
 
 // ==========================================================
 interface Props {
@@ -36,13 +38,8 @@ interface Props {
 }
 
 // ==========================================================
-const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 0 0 1rem' }) => {
-  const [mode, setMode] = useState<TPieMode>('cpu')
-  const pieMargin = 20
-
-  useEffect(() => {
-    if (mode === 'cpu') setTimeout(() => setMode('memory'), 5000)
-  }, [mode])
+const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 0 0 2.5%' }) => {
+  const pieMargin = 2
 
   return (
     <div
@@ -56,7 +53,6 @@ const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 
 
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
         justifyContent: 'space-around'
       }}
     >
@@ -64,8 +60,7 @@ const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 
         style={{
           margin: '0 0 0 1rem',
           fontSize: '1.25rem',
-          color: colors['blue'],
-          alignSelf: 'flex-start'
+          color: colors['blue']
         }}
       >
         {node.name}
@@ -73,32 +68,46 @@ const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 
       <div
         style={{
           width: '100%',
-          height: `calc(${height} - 4rem)`
+          height: `calc(${height} - 4rem)`,
+
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center'
         }}
       >
-        <ResponsivePie
-          data={getData(mode, node)}
-          margin={{ top: pieMargin, right: pieMargin, bottom: pieMargin, left: pieMargin }}
-          innerRadius={0.5}
-          padAngle={0.7}
-          cornerRadius={3}
-          colors={[colors['green'], colors['blue']]}
-          borderWidth={1}
-          borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-          radialLabelsSkipAngle={10}
-          radialLabelsTextXOffset={6}
-          radialLabelsTextColor="#333333"
-          radialLabelsLinkOffset={0}
-          radialLabelsLinkDiagonalLength={16}
-          radialLabelsLinkHorizontalLength={24}
-          radialLabelsLinkStrokeWidth={1}
-          radialLabelsLinkColor={{ from: 'color' }}
-          slicesLabelsSkipAngle={10}
-          slicesLabelsTextColor="#333333"
-          animate={true}
-          motionStiffness={90}
-          motionDamping={15}
-        />
+        {modes.map((mode: TNodeSpec) => (
+          <div
+            key={mode}
+            style={{
+              width: '50%',
+              height: '85%'
+            }}
+          >
+            <ResponsivePie
+              data={getData(mode, node)}
+              margin={{ top: pieMargin, right: pieMargin, bottom: pieMargin, left: pieMargin }}
+              innerRadius={0.7}
+              padAngle={5}
+              cornerRadius={2}
+              colors={[colors['green'], colors['blue']]}
+              borderWidth={2}
+              borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+              enableRadialLabels={false}
+              radialLabelsSkipAngle={10}
+              radialLabelsTextXOffset={5}
+              radialLabelsTextColor={colors['darkGrey']}
+              radialLabelsLinkDiagonalLength={16}
+              radialLabelsLinkHorizontalLength={24}
+              radialLabelsLinkStrokeWidth={2}
+              radialLabelsLinkColor={{ from: 'color' }}
+              enableSlicesLabels={false}
+              tooltip={e => <span>{`${e.value}${mode === 'cpu' ? 'm' : ' MByte'}`}</span>}
+              animate={true}
+              motionStiffness={90}
+              motionDamping={15}
+            />
+          </div>
+        ))}
       </div>
     </div>
   )

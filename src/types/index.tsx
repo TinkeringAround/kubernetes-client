@@ -60,4 +60,3 @@ export type TNodeInfo = {
 }
 
 // ==========================================================
-export type TPieMode = 'cpu' | 'memory'

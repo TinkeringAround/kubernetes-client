@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react'
+import React, { FC, useContext, useState } from 'react'
 
 // Types
 import { TNode } from '../../types'
@@ -11,10 +11,12 @@ import { colors } from '../../styles'
 
 // Components
 import NodePie from '../node/pie'
+import Icon from '../../atoms/icons'
 
 // ==========================================================
 const Dashboard: FC = () => {
   const { nodes } = useContext(K8sContext)
+  const [pagination, setPagination] = useState<number>(0)
 
   return (
     <div
@@ -25,19 +27,36 @@ const Dashboard: FC = () => {
         padding: '1rem'
       }}
     >
-      <h1 style={{ margin: '0 0 2rem', color: colors['blue'], fontSize: '3rem' }}>Nodes</h1>
+      <h1 style={{ margin: '0 0 1.5rem', color: colors['blue'], fontSize: '3rem' }}>Nodes</h1>
+
+      {/* Charts */}
       <div
         style={{
           height: '40%',
           width: 'calc(100% - 2rem)',
 
           display: 'flex',
-          flexDirection: 'row'
+          flexDirection: 'row',
+          alignItems: 'center'
         }}
       >
-        {nodes?.map((node: TNode, index: number) => (
-          <NodePie key={'Node-' + index} node={node} margin={index === 0 ? '0' : undefined} />
-        ))}
+        {nodes?.map((node: TNode, index: number) =>
+          index === pagination || index === pagination + 1 ? (
+            <NodePie key={'Node-' + index} node={node} margin={index === 0 ? '0' : undefined} />
+          ) : (
+            <></>
+          )
+        )}
+        <Icon
+          type="plus"
+          size="3rem"
+          margin="0 0 0 1rem"
+          disabled={nodes && nodes.length <= 2 ? true : false}
+          onClick={() => {
+            if (nodes && nodes.length > 2 && pagination + 2 >= nodes.length) setPagination(0)
+            else if (nodes && pagination + 2 < nodes.length) setPagination(pagination + 1)
+          }}
+        />
       </div>
     </div>
   )

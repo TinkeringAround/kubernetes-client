@@ -71,6 +71,7 @@ const icons = {
 interface Props {
   type: IconType | null
   selected?: boolean
+  disabled?: boolean
   size?: string
   iconSize?: string
   margin?: string
@@ -83,6 +84,7 @@ interface Props {
 const Icon: FC<Props> = ({
   type,
   selected = false,
+  disabled = false,
   size = '40px',
   iconSize = '60%',
   margin = '0',
@@ -101,7 +103,13 @@ const Icon: FC<Props> = ({
         margin: margin,
 
         // Styling
-        background: selected ? colors['blue'] : hovered ? 'rgba(0, 120, 225,0.1)' : 'transparent',
+        background: disabled
+          ? 'transparent'
+          : selected
+          ? colors['blue']
+          : hovered
+          ? 'rgba(0, 120, 225,0.1)'
+          : 'transparent',
         borderRadius: 5,
 
         // View
@@ -131,7 +139,7 @@ const Icon: FC<Props> = ({
           height: iconSize,
 
           //@ts-ignore
-          fill: selected ? 'white' : colors[color],
+          fill: disabled ? colors['lightgrey'] : selected ? 'white' : colors[color],
 
           // View Settings
           verticalAlign: 'middle',

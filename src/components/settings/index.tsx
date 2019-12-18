@@ -1,9 +1,6 @@
-import React, { useContext, FC } from 'react'
+import React, { FC } from 'react'
 import { Box } from 'grommet'
 import styled from 'styled-components'
-
-// Context
-import { AppContext } from '../../context'
 
 // Atoms
 import Button from '../../atoms/button'
@@ -18,17 +15,13 @@ const SSettings = styled(Box)`
 `
 
 // ==========================================================
-const Settings: FC = () => {
-  const { page } = useContext(AppContext)
-
-  return (
-    <SSettings>
-      <Button color="white" background="blue" padding="0.5rem .75rem 0.5rem .5rem">
-        <Icon type="cluster" size="2rem" color="white" />
-        Change Cluster
-      </Button>
-    </SSettings>
-  )
-}
+const Settings: FC = () => (
+  <SSettings>
+    <Button color="white" background="blue" padding="0.5rem .75rem 0.5rem .5rem">
+      <Icon type="cluster" size="2rem" color="white" />
+      Change Cluster
+    </Button>
+  </SSettings>
+)
 
 export default Settings

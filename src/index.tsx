@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
 
 // Types
-import { TContexts, TError, TNodes, TNamespaces } from './types'
+import { TContexts, TError, TNodes, TNamespaces, TNamespace, TServices } from './types'
 
 // Styles
 import './styles/global.css'
@@ -16,7 +16,8 @@ import Layout from './components/layout'
 import Nodes from './components/nodes'
 
 // Driver
-import { getContexts, getNodes, getNamespaces } from './driver/ipc'
+import { getContexts, getNodes, getNamespaces, getServices } from './driver/ipc'
+import Services from './components/services'
 
 // ==========================================================
 const App: FC = () => {
@@ -26,7 +27,9 @@ const App: FC = () => {
   // K8s Context
   const [contexts, setContexts] = useState<TContexts | null>(null)
   const [nodes, setNodes] = useState<TNodes | null>(null)
+  const [currentNamespace, setCurrentNamespace] = useState<string | null>('mkn')
   const [namespaces, setNamespaces] = useState<TNamespaces | null>(null)
+  const [services, setServices] = useState<TServices | null>(null)
 
   // ==========================================================
   const reloadContexts = () => {
@@ -50,7 +53,28 @@ const App: FC = () => {
     if ('error' in loadedNamespaces) setError(loadedNamespaces)
     else setNamespaces(loadedNamespaces)
 
+    if (currentNamespace) setNamespace(currentNamespace)
+
     return loadedNamespaces
+  }
+
+  const setNamespace = (newNamespace: string) => {
+    const ns: TNamespace | undefined = namespaces?.find(n => n.name.includes(newNamespace))
+    if (ns && !currentNamespace?.includes(newNamespace)) setCurrentNamespace(newNamespace)
+  }
+
+  const reloadServices = () => {
+    if (currentNamespace) {
+      const loadedServices = getServices(currentNamespace)
+      if ('error' in loadedServices) setError(loadedServices)
+      else setServices(loadedServices)
+
+      return loadedServices
+    } else
+      return {
+        message: 'An error occured fetching Services.',
+        error: 'No namespace provided.'
+      }
   }
 
   // ==========================================================
@@ -61,10 +85,6 @@ const App: FC = () => {
   useEffect(() => {
     if (!nodes) reloadNodes()
   }, [nodes])
-
-  useEffect(() => {
-    if (!namespaces) reloadNamespaces()
-  }, [namespaces])
 
   // ==========================================================
   return (
@@ -87,11 +107,19 @@ const App: FC = () => {
           nodes: nodes,
           reloadNodes: reloadNodes,
 
+          currentNamespace: currentNamespace,
+          setNamespace: setNamespace,
           namespaces: namespaces,
-          reloadNamespaces: reloadNamespaces
+          reloadNamespaces: reloadNamespaces,
+
+          services: services,
+          reloadServices: reloadServices
         }}
       >
-        <Layout>{page === 0 && <Nodes index={0} />}</Layout>
+        <Layout>
+          {page === 0 && <Nodes index={0} />}
+          {page === 1 && <Services index={1} />}
+        </Layout>
       </K8sContext.Provider>
     </AppContext.Provider>
   )

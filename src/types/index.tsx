@@ -1,12 +1,6 @@
 import { Remote, IpcRenderer } from 'electron'
 
 // ==========================================================
-export type TError = {
-  message: string
-  error: string
-}
-
-// ==========================================================
 export type TElectron = {
   remote: Remote
   ipcRenderer: IpcRenderer
@@ -20,8 +14,13 @@ declare global {
 
 // ==========================================================
 export type TResponse = {
-  data: TContexts | TNodes | TNamespaces | null
+  data: TContexts | TNodes | TNamespaces | TServices | null
   error: string | null
+}
+
+export type TError = {
+  message: string
+  error: string
 }
 
 // ==========================================================
@@ -67,4 +66,21 @@ export type TNamespaces = Array<TNamespace>
 export type TNamespace = {
   name: string
   status: boolean
+}
+
+// ==========================================================
+export type TServices = Array<TService>
+
+export type TService = {
+  name: string
+  type: TServiceType
+  ports: Array<TServicePort>
+}
+
+export type TServiceType = 'ClusterIP' | 'LoadBalancer' | 'NodePort'
+
+export type TServicePort = {
+  name: string
+  port: number
+  protocol: string
 }

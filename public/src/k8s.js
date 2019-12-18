@@ -128,7 +128,19 @@ async function getServicesInNamespace(event, namespace) {
   try {
     let services = await client.api.v1.namespaces(namespace).services.get()
     event.returnValue = {
-      data: services.body.items,
+      data: services.body.items.map(service => {
+        return {
+          name: service.metadata.name,
+          type: service.spec.type,
+          ports: service.spec.ports.map(port => {
+            return {
+              name: port.name,
+              port: port.port,
+              protocol: port.protocol
+            }
+          })
+        }
+      }),
       error: null
     }
   } catch (error) {

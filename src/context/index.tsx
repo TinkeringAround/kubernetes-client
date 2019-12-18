@@ -1,7 +1,7 @@
 import React from 'react'
 
 // Types
-import { TError, TContexts, TNodes, TNamespaces } from '../types'
+import { TError, TContexts, TNodes, TNamespaces, TServices } from '../types'
 
 // ==========================================================
 type AppContextProps = {
@@ -28,8 +28,13 @@ type K8sContextProps = {
   nodes: TNodes | null
   reloadNodes: () => TNodes | TError
 
+  currentNamespace: string | null
+  setNamespace: (namespace: string) => void
   namespaces: TNamespaces | null
   reloadNamespaces: () => TNamespaces | TError
+
+  services: TServices | null
+  reloadServices: () => TServices | TError
 }
 
 export const K8sContext = React.createContext<K8sContextProps>({
@@ -52,8 +57,19 @@ export const K8sContext = React.createContext<K8sContextProps>({
   },
 
   // Namespaces
+  currentNamespace: null,
+  setNamespace: (namespace: string) => {},
   namespaces: null,
   reloadNamespaces: () => {
+    return {
+      message: '',
+      error: ''
+    }
+  },
+
+  // Services
+  services: null,
+  reloadServices: () => {
     return {
       message: '',
       error: ''

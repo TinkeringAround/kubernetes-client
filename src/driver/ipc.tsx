@@ -1,5 +1,5 @@
 // Types
-import { TResponse, TContexts, TError, TNodes, TNamespaces } from '../types'
+import { TResponse, TContexts, TError, TNodes, TNamespaces, TServices } from '../types'
 
 // Consts
 const { ipcRenderer } = window.electron
@@ -40,6 +40,21 @@ export const getNamespaces: () => TNamespaces | TError = () => {
   console.info('Namespaces: ', response.data)
 
   if (response.data) return response.data as TNamespaces
+  else {
+    console.error(response.error)
+    return {
+      message: 'An unexpected error occured.',
+      error: response.error ? response.error : 'Unkown Error.'
+    }
+  }
+}
+
+// ==========================================================
+export const getServices: (namespace: string) => TServices | TError = (namespace: string) => {
+  const response: TResponse = ipcRenderer.sendSync('services', namespace)
+  console.info('Services: ', response.data)
+
+  if (response.data) return response.data as TServices
   else {
     console.error(response.error)
     return {

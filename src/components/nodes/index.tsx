@@ -1,11 +1,11 @@
-import React, { FC, useContext, useState, Fragment } from 'react'
+import React, { FC, useContext, useState, Fragment, useEffect } from 'react'
 import { Box, Heading } from 'grommet'
 
 // Types
 import { TNode } from '../../types'
 
 // Context
-import { K8sContext } from '../../context'
+import { K8sContext, AppContext } from '../../context'
 
 // Styles
 import { colors } from '../../styles'
@@ -17,9 +17,19 @@ import Icon from '../../atoms/icons'
 import NodePie from '../node/pie'
 
 // ==========================================================
-const Dashboard: FC = () => {
-  const { nodes } = useContext(K8sContext)
+interface Props {
+  index: number
+}
+
+// ==========================================================
+const Nodes: FC<Props> = ({ index }) => {
+  const { page } = useContext(AppContext)
+  const { nodes, reloadNodes } = useContext(K8sContext)
   const [pagination, setPagination] = useState<number>(0)
+
+  useEffect(() => {
+    if (page === index) reloadNodes()
+  }, [page])
 
   return (
     <Box pad="2rem" width="inherit" height="inherit" justify="between">
@@ -50,4 +60,4 @@ const Dashboard: FC = () => {
   )
 }
 
-export default Dashboard
+export default Nodes

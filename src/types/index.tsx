@@ -20,7 +20,7 @@ declare global {
 
 // ==========================================================
 export type TResponse = {
-  data: TContexts | TNodes | null
+  data: TContexts | TNodes | TNamespaces | null
   error: string | null
 }
 
@@ -62,3 +62,9 @@ export type TNodeInfo = {
 }
 
 // ==========================================================
+export type TNamespaces = Array<TNamespace>
+
+export type TNamespace = {
+  name: string
+  status: boolean
+}

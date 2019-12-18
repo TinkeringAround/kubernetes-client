@@ -42,7 +42,12 @@ const Navigation: FC = () => {
         }}
       >
         <Logo />
-        <Icon type="home" selected={page === 0} margin="5rem 0 .75rem" onClick={() => setPage(0)} />
+        <Icon
+          type="server"
+          selected={page === 0}
+          margin="5rem 0 .75rem"
+          onClick={() => setPage(0)}
+        />
         <Icon type="service" selected={page === 1} margin="0 0 .75rem" onClick={() => setPage(1)} />
       </div>
     </div>

@@ -15,7 +15,7 @@ export type TColor =
 
 export const colors = {
   // Effects
-  shadowGrey: 'rgba(230,230,230,0.65)',
+  shadowGrey: 'rgba(230,230,230,0.1)',
   hoverGrey: 'rgba(230,230,230,0.5)',
   hoverBlue: 'rgba(0, 120, 225,0.1)',
 

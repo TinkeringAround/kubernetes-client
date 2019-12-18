@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
 
 // Types
-import { TContexts, TError, TNodes } from './types'
+import { TContexts, TError, TNodes, TNamespaces } from './types'
 
 // Styles
 import './styles/global.css'
@@ -13,10 +13,10 @@ import { AppContext, K8sContext } from './context'
 
 // Components
 import Layout from './components/layout'
-import Dashboard from './components/dashboard'
+import Nodes from './components/nodes'
 
 // Driver
-import { getContexts, getNodes } from './driver/ipc'
+import { getContexts, getNodes, getNamespaces } from './driver/ipc'
 
 // ==========================================================
 const App: FC = () => {
@@ -26,6 +26,7 @@ const App: FC = () => {
   // K8s Context
   const [contexts, setContexts] = useState<TContexts | null>(null)
   const [nodes, setNodes] = useState<TNodes | null>(null)
+  const [namespaces, setNamespaces] = useState<TNamespaces | null>(null)
 
   // ==========================================================
   const reloadContexts = () => {
@@ -44,6 +45,14 @@ const App: FC = () => {
     return loadedNodes
   }
 
+  const reloadNamespaces = () => {
+    const loadedNamespaces = getNamespaces()
+    if ('error' in loadedNamespaces) setError(loadedNamespaces)
+    else setNamespaces(loadedNamespaces)
+
+    return loadedNamespaces
+  }
+
   // ==========================================================
   useEffect(() => {
     if (!contexts) reloadContexts()
@@ -52,6 +61,10 @@ const App: FC = () => {
   useEffect(() => {
     if (!nodes) reloadNodes()
   }, [nodes])
+
+  useEffect(() => {
+    if (!namespaces) reloadNamespaces()
+  }, [namespaces])
 
   // ==========================================================
   return (
@@ -72,12 +85,13 @@ const App: FC = () => {
           reloadContexts: reloadContexts,
 
           nodes: nodes,
-          reloadNodes: reloadNodes
+          reloadNodes: reloadNodes,
+
+          namespaces: namespaces,
+          reloadNamespaces: reloadNamespaces
         }}
       >
-        <Layout>
-          <Dashboard />
-        </Layout>
+        <Layout>{page === 0 && <Nodes index={0} />}</Layout>
       </K8sContext.Provider>
     </AppContext.Provider>
   )

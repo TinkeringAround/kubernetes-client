@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useState, Fragment } from 'react'
 
 // Styles:
 import { colors, TColor } from '../styles'
@@ -19,6 +19,7 @@ export type IconType =
   | 'server'
   | 'service'
   | 'pod'
+  | 'cluster'
 
 // ===================================================================
 const icons = {
@@ -83,12 +84,19 @@ const icons = {
     path: (
       <path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z" />
     )
+  },
+  cluster: {
+    viewBox: '0 0 640 512',
+    path: (
+      <path d="M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4z" />
+    )
   }
 }
 
 // ===================================================================
 interface Props {
   type: IconType | null
+  button?: boolean
   selected?: boolean
   disabled?: boolean
   size?: string
@@ -102,6 +110,7 @@ interface Props {
 // ===================================================================
 const Icon: FC<Props> = ({
   type,
+  button = true,
   selected = false,
   disabled = false,
   size = '40px',
@@ -114,61 +123,85 @@ const Icon: FC<Props> = ({
   const [hovered, setHovered] = useState<boolean>(false)
 
   return (
-    <div
-      style={{
-        // Sizing
-        width: size,
-        height: size,
-        margin: margin,
+    <Fragment>
+      {button ? (
+        <div
+          style={{
+            // Sizing
+            width: size,
+            height: size,
+            margin: margin,
 
-        // Styling
-        background: disabled
-          ? 'transparent'
-          : selected
-          ? colors['blue']
-          : hovered
-          ? colors['hoverBlue']
-          : 'transparent',
-        borderRadius: 5,
+            // Styling
+            background: disabled
+              ? 'transparent'
+              : selected
+              ? colors['blue']
+              : hovered
+              ? colors['hoverBlue']
+              : 'transparent',
+            borderRadius: 5,
 
-        // View
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+            // View
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
 
-        // Options
-        cursor: onClick ? 'pointer' : 'inherit',
-        transition: 'all 0.25s ease',
-        ...style
-      }}
-      onClick={onClick}
-      onMouseOver={() => {
-        if (!hovered) setHovered(true)
-      }}
-      onMouseLeave={() => {
-        if (hovered) setHovered(false)
-      }}
-    >
-      <svg
-        // @ts-ignore
-        viewBox={type ? icons[type].viewBox : '0 0 0 0'}
-        style={{
-          // Sizes
-          width: iconSize,
-          height: iconSize,
+            // Options
+            cursor: onClick ? 'pointer' : 'inherit',
+            transition: 'all 0.25s ease',
+            ...style
+          }}
+          onClick={onClick}
+          onMouseOver={() => {
+            if (!hovered) setHovered(true)
+          }}
+          onMouseLeave={() => {
+            if (hovered) setHovered(false)
+          }}
+        >
+          <svg
+            // @ts-ignore
+            viewBox={type ? icons[type].viewBox : '0 0 0 0'}
+            style={{
+              // Sizes
+              width: iconSize,
+              height: iconSize,
 
-          //@ts-ignore
-          fill: disabled ? colors['grey'] : selected ? 'white' : colors[color],
+              //@ts-ignore
+              fill: disabled ? colors['grey'] : selected ? 'white' : colors[color],
 
-          // View Settings
-          verticalAlign: 'middle',
-          transition: 'all 0.25s ease'
-        }}
-      >
-        {// @ts-ignore
-        type ? icons[type].path : null}
-      </svg>
-    </div>
+              // View Settings
+              verticalAlign: 'middle',
+              transition: 'all 0.25s ease'
+            }}
+          >
+            {// @ts-ignore
+            type ? icons[type].path : null}
+          </svg>
+        </div>
+      ) : (
+        <svg
+          // @ts-ignore
+          viewBox={type ? icons[type].viewBox : '0 0 0 0'}
+          style={{
+            // Sizes
+            width: size,
+            height: size,
+
+            //@ts-ignore
+            fill: selected ? 'white' : colors[color],
+
+            // View Settings
+            verticalAlign: 'middle',
+            transition: 'all 0.25s ease'
+          }}
+        >
+          {// @ts-ignore
+          type ? icons[type].path : null}
+        </svg>
+      )}
+    </Fragment>
   )
 }
 

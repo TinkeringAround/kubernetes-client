@@ -91,7 +91,12 @@ async function getNamespaces(event) {
   try {
     const namespaces = await client.api.v1.namespaces.get()
     event.returnValue = {
-      data: namespaces.body.items,
+      data: namespaces.body.items.map(namespace => {
+        return {
+          name: namespace.metadata.name,
+          status: namespace.status.phase.includes('ctive')
+        }
+      }),
       error: null
     }
   } catch (error) {

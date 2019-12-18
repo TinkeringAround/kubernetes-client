@@ -5,6 +5,7 @@ export type TColor =
   | 'hoverBlue'
 
   // Colors
+  | 'transparent'
   | 'white'
   | 'black'
   | 'lightGrey'
@@ -20,6 +21,7 @@ export const colors = {
   hoverBlue: 'rgba(0, 120, 225,0.1)',
 
   // Colors
+  transparent: 'transparent',
   white: 'white',
   black: 'rgb(50,50,50)',
   lightGrey: 'rgba(230,230,230,0.3)',

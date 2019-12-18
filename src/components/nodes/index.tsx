@@ -14,22 +14,17 @@ import { colors } from '../../styles'
 import Icon from '../../atoms/icons'
 
 // Components
-import NodePie from '../node/pie'
+import NodePie from './pie'
 
 // ==========================================================
-interface Props {
-  index: number
-}
-
-// ==========================================================
-const Nodes: FC<Props> = ({ index }) => {
+const Nodes: FC = () => {
   const { page } = useContext(AppContext)
   const { nodes, reloadNodes } = useContext(K8sContext)
   const [pagination, setPagination] = useState<number>(0)
 
   useEffect(() => {
-    if (page === index) reloadNodes()
-  }, [page])
+    if (page === 0) reloadNodes()
+  }, [page, reloadNodes])
 
   return (
     <Box pad="2rem" width="inherit" height="inherit" justify="between">

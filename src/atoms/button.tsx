@@ -46,7 +46,7 @@ const Button: FC<Props> = ({
       color: colors[color],
 
       background: disabled ? colors['lightGrey'] : colors[background],
-      borderRadius: 10,
+      borderRadius: 5,
       border: 'none',
 
       display: 'flex',

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useState, useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
 
@@ -27,43 +27,48 @@ const App: FC = () => {
   // K8s Context
   const [contexts, setContexts] = useState<TContexts | null>(null)
   const [nodes, setNodes] = useState<TNodes | null>(null)
-  const [currentNamespace, setCurrentNamespace] = useState<string | null>('mkn')
+  const [currentNamespace, setCurrentNamespace] = useState<string | null>('default')
   const [namespaces, setNamespaces] = useState<TNamespaces | null>(null)
   const [services, setServices] = useState<TServices | null>(null)
 
   // ==========================================================
-  const reloadContexts = () => {
+  const reloadContexts = useCallback(() => {
     const loadedContexts = getContexts()
     if ('activeContext' in loadedContexts) setContexts(loadedContexts)
     else setError(loadedContexts)
 
     return loadedContexts
-  }
+  }, [])
 
-  const reloadNodes = () => {
+  const reloadNodes = useCallback(() => {
     const loadedNodes = getNodes()
     if ('error' in loadedNodes) setError(loadedNodes)
     else setNodes(loadedNodes)
 
     return loadedNodes
-  }
+  }, [])
 
-  const reloadNamespaces = () => {
+  const setActiveNamespace = useCallback(
+    (newNamespace: string) => {
+      if (namespaces && currentNamespace) {
+        const ns: TNamespace | undefined = namespaces.find(n => n.name.includes(newNamespace))
+        if (ns && !currentNamespace.includes(newNamespace)) setCurrentNamespace(newNamespace)
+      }
+    },
+    [namespaces, currentNamespace, setCurrentNamespace]
+  )
+
+  const reloadNamespaces = useCallback(() => {
     const loadedNamespaces = getNamespaces()
     if ('error' in loadedNamespaces) setError(loadedNamespaces)
     else setNamespaces(loadedNamespaces)
 
-    if (currentNamespace) setNamespace(currentNamespace)
+    if (currentNamespace) setActiveNamespace(currentNamespace)
 
     return loadedNamespaces
-  }
+  }, [currentNamespace, setActiveNamespace])
 
-  const setNamespace = (newNamespace: string) => {
-    const ns: TNamespace | undefined = namespaces?.find(n => n.name.includes(newNamespace))
-    if (ns && !currentNamespace?.includes(newNamespace)) setCurrentNamespace(newNamespace)
-  }
-
-  const reloadServices = () => {
+  const reloadServices = useCallback(() => {
     if (currentNamespace) {
       const loadedServices = getServices(currentNamespace)
       if ('error' in loadedServices) setError(loadedServices)
@@ -75,16 +80,7 @@ const App: FC = () => {
         message: 'An error occured fetching Services.',
         error: 'No namespace provided.'
       }
-  }
-
-  // ==========================================================
-  useEffect(() => {
-    if (!contexts) reloadContexts()
-  }, [contexts])
-
-  useEffect(() => {
-    if (!nodes) reloadNodes()
-  }, [nodes])
+  }, [currentNamespace])
 
   // ==========================================================
   return (
@@ -108,7 +104,7 @@ const App: FC = () => {
           reloadNodes: reloadNodes,
 
           currentNamespace: currentNamespace,
-          setNamespace: setNamespace,
+          setNamespace: setActiveNamespace,
           namespaces: namespaces,
           reloadNamespaces: reloadNamespaces,
 
@@ -117,8 +113,8 @@ const App: FC = () => {
         }}
       >
         <Layout>
-          {page === 0 && <Nodes index={0} />}
-          {page === 1 && <Services index={1} />}
+          {page === 0 && <Nodes />}
+          {page === 1 && <Services />}
         </Layout>
       </K8sContext.Provider>
     </AppContext.Provider>

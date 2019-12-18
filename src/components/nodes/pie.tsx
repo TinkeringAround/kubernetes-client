@@ -92,7 +92,7 @@ const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 
             {node.nodeInfo.containerRuntimeVersion}
           </Text>
         </Box>
-        <Box margin="1rem 0 0" direction="row" align="center" justify="between">
+        <Box margin="1rem 0 0" direction="row" align="center">
           <Box
             direction="row"
             pad="0.5rem"
@@ -111,6 +111,7 @@ const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 
             </Text>
           </Box>
           <Dropdown
+            margin="0 0 0 .5rem"
             options={modes}
             value={mode === 'cpu' ? 'CPU' : 'Memory'}
             select={(selection: string) => {

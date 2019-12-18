@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, CSSProperties } from 'react'
 import styled from 'styled-components'
 import { Box, Text } from 'grommet'
 
@@ -36,6 +36,7 @@ interface Props {
 
   width?: string
   margin?: string
+  style?: CSSProperties
 }
 
 // ==========================================================
@@ -45,9 +46,10 @@ const Dropdown: FC<Props> = ({
   select,
   label = null,
   width = '25%',
-  margin = '0'
+  margin = '0',
+  style = undefined
 }) => (
-  <Box margin={margin} width={width} alignSelf="end">
+  <Box margin={margin} width={width} style={style}>
     {label && (
       <Text size="1rem" weight="bold" color={colors['grey']} margin="0 0 .25rem .25rem">
         {label}

@@ -42,22 +42,26 @@ async function getNodes(event) {
           }
         })
 
-        let aCPU = parseInt(node.status.allocatable.cpu.match(/\d/g).join(''), 10).toFixed()
-        let cCPU = parseInt(node.status.capacity.cpu.match(/\d/g).join(''), 10).toFixed()
+        let aCPU = parseInt(
+          parseInt(node.status.allocatable.cpu.match(/\d/g).join(''), 10).toFixed()
+        )
+        let aMemory = parseInt(
+          (parseInt(node.status.allocatable.memory.match(/\d/g).join(''), 10) / 1000).toFixed()
+        )
+        let cCPU = parseInt(parseInt(node.status.capacity.cpu.match(/\d/g).join(''), 10).toFixed())
+        let cMemory = parseInt(
+          (parseInt(node.status.capacity.memory.match(/\d/g).join(''), 10) / 1000).toFixed()
+        )
 
         return {
           name: node.metadata.name,
           allocatable: {
             cpu: aCPU < 10 ? aCPU * 1000 : aCPU,
-            memory: (
-              parseInt(node.status.allocatable.memory.match(/\d/g).join(''), 10) / 1000
-            ).toFixed()
+            memory: aMemory
           },
           capacity: {
             cpu: cCPU < 10 ? cCPU * 1000 : cCPU,
-            memory: (
-              parseInt(node.status.capacity.memory.match(/\d/g).join(''), 10) / 1000
-            ).toFixed()
+            memory: cMemory
           },
           conditions: {
             status: errors.length === 0,

@@ -1,7 +1,7 @@
 import React, { FC, useContext } from 'react'
 
 // Styles
-import { colors, sizes } from '../../styles'
+import { sizes } from '../../styles'
 
 // Context
 import { AppContext } from '../../context'
@@ -23,7 +23,6 @@ const Navigation: FC = () => {
         height: '100%',
 
         background: 'white',
-        borderRight: 'solid 4px ' + colors['lightgrey'],
 
         display: 'flex',
         flexDirection: 'row',

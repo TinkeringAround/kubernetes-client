@@ -13,12 +13,15 @@
     "@nivo/pie": "^0.60.0",
     "electron": "^7.1.2",
     "electron-is-dev": "^1.1.0",
+    "grommet": "^2.9.0",
     "kubernetes-client": "^8.3.6",
     "node-cmd": "^3.0.0",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "styled-components": "^4.4.1"
   },
   "devDependencies": {
+    "@types/styled-components": "^4.4.1",
     "@types/jest": "24.0.23",
     "@types/node": "12.12.16",
     "@types/react": "^16.9.11",

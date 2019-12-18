@@ -1,4 +1,5 @@
-import React, { FC, useContext, useState } from 'react'
+import React, { FC, useContext, useState, Fragment } from 'react'
+import { Box, Heading } from 'grommet'
 
 // Types
 import { TNode } from '../../types'
@@ -9,9 +10,11 @@ import { K8sContext } from '../../context'
 // Styles
 import { colors } from '../../styles'
 
+// Atoms
+import Icon from '../../atoms/icons'
+
 // Components
 import NodePie from '../node/pie'
-import Icon from '../../atoms/icons'
 
 // ==========================================================
 const Dashboard: FC = () => {
@@ -19,37 +22,22 @@ const Dashboard: FC = () => {
   const [pagination, setPagination] = useState<number>(0)
 
   return (
-    <div
-      style={{
-        width: 'inherit',
-        height: 'inherit',
+    <Box pad="2rem" width="inherit" height="inherit" justify="between">
+      <Heading level="1" size="3rem" color={colors['blue']} margin="0">
+        Nodes
+      </Heading>
 
-        padding: '1rem'
-      }}
-    >
-      <h1 style={{ margin: '0 0 1.5rem', color: colors['blue'], fontSize: '3rem' }}>Nodes</h1>
-
-      {/* Charts */}
-      <div
-        style={{
-          height: '40%',
-          width: 'calc(100% - 2rem)',
-
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center'
-        }}
-      >
+      <Box height="85%" width="100%" direction="row" align="center">
         {nodes?.map((node: TNode, index: number) =>
           index === pagination || index === pagination + 1 ? (
             <NodePie key={'Node-' + index} node={node} margin={index === 0 ? '0' : undefined} />
           ) : (
-            <></>
+            <Fragment />
           )
         )}
         <Icon
-          type="plus"
-          size="3rem"
+          type="right"
+          size="6rem"
           margin="0 0 0 1rem"
           disabled={nodes && nodes.length <= 2 ? true : false}
           onClick={() => {
@@ -57,8 +45,8 @@ const Dashboard: FC = () => {
             else if (nodes && pagination + 2 < nodes.length) setPagination(pagination + 1)
           }}
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 

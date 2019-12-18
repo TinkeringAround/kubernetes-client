@@ -1,27 +1,24 @@
 import React, { FC } from 'react'
+import { Box } from 'grommet'
 
 // Styles
-import { sizes } from '../../styles'
+import { sizes, colors } from '../../styles'
 
 // Components
 import Navigation from '../navigation/'
 
 // ==========================================================
 const Layout: FC = ({ children }) => (
-  <div
-    style={{
-      width: '100vw',
-      height: '100vh',
-
-      display: 'flex',
-      flexDirection: 'row'
-    }}
-  >
+  <Box width="100vw" height="100vh" direction="row">
     <Navigation />
-    <div style={{ height: '100vh', width: `calc(100vw - ${sizes['navigation']}px)` }}>
+    <Box
+      height="100vh"
+      width={`calc(100vw - ${sizes['navigation']}px)`}
+      background={colors['lightGrey']}
+    >
       {children}
-    </div>
-  </div>
+    </Box>
+  </Box>
 )
 
 export default Layout

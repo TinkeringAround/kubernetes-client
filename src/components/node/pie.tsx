@@ -1,33 +1,34 @@
-import React, { FC } from 'react'
+import React, { FC, useState } from 'react'
 import { ResponsivePie } from '@nivo/pie'
+import { Box, Heading, Text } from 'grommet'
+import styled from 'styled-components'
 
 // Styles
 import { colors } from '../../styles'
 
 // Types
-import { TNode } from '../../types'
-type TNodeSpec = 'cpu' | 'memory'
+import { TNode, TSpecTypes } from '../../types'
 
-// Dummy Data
-const getData = (mode: TNodeSpec, node: TNode) => {
-  const data = [
-    {
-      id: mode === 'cpu' ? 'Allocatable CPU' : 'Allocatable Memory',
-      label: mode === 'cpu' ? 'Allocatable CPU' : 'Allocatable Memory',
-      value: mode === 'cpu' ? node.allocatable.cpu : node.allocatable.memory
-    },
-    {
-      id: mode === 'cpu' ? 'Reserved CPU' : 'Reserved Memory',
-      label: mode === 'cpu' ? 'Reserved CPU' : 'Reserved Memory',
-      value:
-        mode === 'cpu'
-          ? node.capacity.cpu - node.allocatable.cpu
-          : node.capacity.memory - node.allocatable.memory
-    }
-  ]
-  return data
-}
-const modes: Array<TNodeSpec> = ['cpu', 'memory']
+// Atoms
+import Dropdown from '../../atoms/dropdown'
+import Icon from '../../atoms/icons'
+
+// Consts
+const modes = ['CPU', 'Memory']
+
+// ==========================================================
+const SPie = styled(Box)`
+  padding: 1rem;
+
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px 0px ${colors['shadowGrey']};
+
+  justify-content: space-between;
+
+  transition: all 0.25s ease;
+  cursor: default;
+`
 
 // ==========================================================
 interface Props {
@@ -39,77 +40,119 @@ interface Props {
 
 // ==========================================================
 const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 0 0 2.5%' }) => {
-  const pieMargin = 2
+  const [mode, setMode] = useState<TSpecTypes>('cpu')
+  const pieMargin = 60
+  const subtitleSize = '0.5rem'
+
+  const getData = (mode: TSpecTypes, node: TNode) => {
+    const data = [
+      {
+        id: 'Free',
+        label: 'Free',
+        value: mode === 'cpu' ? node.allocatable.cpu : node.allocatable.memory
+      },
+      {
+        id: 'Reserved',
+        label: 'Reserved',
+        value:
+          mode === 'cpu'
+            ? node.capacity.cpu - node.allocatable.cpu
+            : node.capacity.memory - node.allocatable.memory
+      }
+    ]
+    return data
+  }
+
+  const healthy = node.conditions.status
 
   return (
-    <div
-      style={{
-        width: width,
-        height: height,
-        margin: margin,
-
-        background: colors['lightgrey'],
-        borderRadius: 10,
-
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-around'
-      }}
-    >
-      <h1
-        style={{
-          margin: '0 0 0 1rem',
-          fontSize: '1.25rem',
-          color: colors['blue']
-        }}
-      >
-        {node.name}
-      </h1>
-      <div
-        style={{
-          width: '100%',
-          height: `calc(${height} - 4rem)`,
-
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center'
-        }}
-      >
-        {modes.map((mode: TNodeSpec) => (
-          <div
-            key={mode}
-            style={{
-              width: '50%',
-              height: '85%'
-            }}
+    <SPie width={width} height={height} margin={margin}>
+      <Box>
+        <Heading
+          level="1"
+          size="1.5rem"
+          color={colors[healthy ? 'blue' : 'red']}
+          margin="0"
+          truncate
+          style={{ fontWeight: 'bold' }}
+        >
+          {node.name}
+        </Heading>
+        <Box direction="row" margin="0.25rem 0 0">
+          <Text size={subtitleSize}>
+            <strong>OS: </strong>
+            {node.nodeInfo.osImage + ' (' + node.nodeInfo.architecture + ')'}
+          </Text>
+          <Text size={subtitleSize} margin="0 .5rem">
+            <strong>K8s: </strong>
+            {node.nodeInfo.kubeletVersion}
+          </Text>
+          <Text size={subtitleSize}>
+            <strong>Runtime: </strong>
+            {node.nodeInfo.containerRuntimeVersion}
+          </Text>
+        </Box>
+        <Box margin="1rem 0 0" direction="row" align="center" justify="between">
+          <Box
+            direction="row"
+            pad="0.5rem"
+            align="center"
+            background={colors[healthy ? 'blue' : 'red']}
+            style={{ borderRadius: 5 }}
           >
-            <ResponsivePie
-              data={getData(mode, node)}
-              margin={{ top: pieMargin, right: pieMargin, bottom: pieMargin, left: pieMargin }}
-              innerRadius={0.7}
-              padAngle={5}
-              cornerRadius={2}
-              colors={[colors['green'], colors['blue']]}
-              borderWidth={2}
-              borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-              enableRadialLabels={false}
-              radialLabelsSkipAngle={10}
-              radialLabelsTextXOffset={5}
-              radialLabelsTextColor={colors['darkGrey']}
-              radialLabelsLinkDiagonalLength={16}
-              radialLabelsLinkHorizontalLength={24}
-              radialLabelsLinkStrokeWidth={2}
-              radialLabelsLinkColor={{ from: 'color' }}
-              enableSlicesLabels={false}
-              tooltip={e => <span>{`${e.value}${mode === 'cpu' ? 'm' : ' MByte'}`}</span>}
-              animate={true}
-              motionStiffness={90}
-              motionDamping={15}
+            <Icon
+              type={healthy ? 'check' : 'error'}
+              size="1rem"
+              color="white"
+              margin="0 0.5rem 0 0"
             />
-          </div>
-        ))}
-      </div>
-    </div>
+            <Text size="0.75rem" weight="bold" margin="0 0.5rem 0 0">
+              {healthy ? 'Ready' : 'Error'}
+            </Text>
+          </Box>
+          <Dropdown
+            options={modes}
+            value={mode === 'cpu' ? 'CPU' : 'Memory'}
+            select={(selection: string) => {
+              if (selection.includes(modes[0]) && mode === 'memory') setMode('cpu')
+              else if (selection.includes(modes[1]) && mode === 'cpu') setMode('memory')
+            }}
+          />
+        </Box>
+      </Box>
+      <Box
+        width="100%"
+        height={`calc(${height} - 6.5rem)`}
+        align="center"
+        style={{ borderRadius: 10 }}
+        background="white"
+      >
+        <ResponsivePie
+          data={getData(mode, node)}
+          margin={{ top: pieMargin, right: pieMargin, bottom: pieMargin, left: pieMargin }}
+          innerRadius={0.6}
+          padAngle={5}
+          cornerRadius={2}
+          colors={[colors[healthy ? 'blue' : 'red'], colors['grey']]}
+          radialLabelsSkipAngle={10}
+          radialLabelsTextXOffset={5}
+          radialLabelsTextColor={colors['black']}
+          radialLabelsLinkDiagonalLength={16}
+          radialLabelsLinkHorizontalLength={24}
+          radialLabelsLinkStrokeWidth={2}
+          radialLabelsLinkColor={{ from: 'color' }}
+          enableSlicesLabels={false}
+          tooltip={e => (
+            <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{`${
+              mode === 'cpu' ? 'CPU: ' : 'Memory: '
+            }${e.value}${mode === 'cpu' ? 'm' : ' MByte'}`}</span>
+          )}
+          animate={true}
+          motionStiffness={90}
+          motionDamping={15}
+        />
+      </Box>
+    </SPie>
   )
 }
 

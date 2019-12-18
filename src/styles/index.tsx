@@ -1,23 +1,32 @@
 export type TColor =
-  | 'lightgrey'
+  // Effects
+  | 'shadowGrey'
+  | 'hoverGrey'
+  | 'hoverBlue'
+
+  // Colors
+  | 'white'
+  | 'black'
+  | 'lightGrey'
   | 'grey'
-  | 'darkGrey'
-  | 'organe'
-  | 'yellow'
-  | 'green'
+  | 'red'
   | 'blue'
   | 'darkBlue'
 
 export const colors = {
-  lightgrey: 'rgb(230,230,230)',
-  grey: 'grey',
-  darkGrey: 'rgb(50,50,50)',
+  // Effects
+  shadowGrey: 'rgba(230,230,230,0.65)',
+  hoverGrey: 'rgba(230,230,230,0.5)',
+  hoverBlue: 'rgba(0, 120, 225,0.1)',
 
-  orange: 'rgba(247, 146, 86, 1)',
-  yellow: 'rgba(251, 209, 162, 1)',
-  green: 'rgba(125, 207, 182, 1)',
+  // Colors
+  white: 'white',
+  black: 'rgb(50,50,50)',
+  lightGrey: 'rgba(230,230,230,0.3)',
+  grey: 'rgb(200,200,200)',
+  red: '#E63946',
   blue: 'rgba(50, 120, 225, 1)',
-  darkBlue: 'rgba(29, 78, 137, 1)'
+  darkBlue: '#134074'
 }
 
 // ==========================================================

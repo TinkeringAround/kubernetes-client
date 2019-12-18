@@ -46,6 +46,8 @@ export type TSpec = {
   memory: number
 }
 
+export type TSpecTypes = 'cpu' | 'memory'
+
 export type TCondition = {
   errors: Array<string>
   status: boolean

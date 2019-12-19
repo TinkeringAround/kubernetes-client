@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
 
 // Types
-import { TContexts, TError, TNodes, TNamespaces, TNamespace, TServices } from './types'
+import { TContexts, TError, TNodes, TNamespaces, TNamespace, TServices, TService } from './types'
 
 // Styles
 import './styles/global.css'
@@ -14,10 +14,10 @@ import { AppContext, K8sContext } from './context'
 // Components
 import Layout from './components/layout'
 import Nodes from './components/nodes'
+import Services from './components/services'
 
 // Driver
 import { getContexts, getNodes, getNamespaces, getServices } from './driver/ipc'
-import Services from './components/services'
 
 // ==========================================================
 const App: FC = () => {
@@ -29,6 +29,7 @@ const App: FC = () => {
   const [nodes, setNodes] = useState<TNodes | null>(null)
   const [currentNamespace, setCurrentNamespace] = useState<string | null>('default')
   const [namespaces, setNamespaces] = useState<TNamespaces | null>(null)
+  const [currentService, setCurrentService] = useState<TService | null>(null)
   const [services, setServices] = useState<TServices | null>(null)
 
   // ==========================================================
@@ -82,6 +83,15 @@ const App: FC = () => {
       }
   }, [currentNamespace])
 
+  const setActiveService = useCallback((service: TService | null) => {
+    // if (currentService) {
+    //   // Stop other Port Forwarding First
+    //   // Then start new one
+    // }
+    console.info('New selected Service: ', service ? service.name : 'Null')
+    setCurrentService(service)
+  }, [])
+
   // ==========================================================
   return (
     <AppContext.Provider
@@ -108,6 +118,8 @@ const App: FC = () => {
           namespaces: namespaces,
           reloadNamespaces: reloadNamespaces,
 
+          currentService: currentService,
+          setService: setActiveService,
           services: services,
           reloadServices: reloadServices
         }}

@@ -9,9 +9,7 @@ import { K8sContext, AppContext } from '../../context'
 import { TNamespace } from '../../types'
 
 // Atoms
-import Button from '../../atoms/button'
 import Dropdown from '../../atoms/dropdown'
-import Icon from '../../atoms/icons'
 
 // ==========================================================
 const SSettings = styled(Box)`
@@ -19,10 +17,6 @@ const SSettings = styled(Box)`
   top: 1rem;
   right: 1rem;
   z-index: 100;
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 `
 
 // ==========================================================
@@ -35,7 +29,8 @@ const Settings: FC = () => {
     currentNamespace,
     setNamespace,
     reloadNamespaces,
-    reloadServices
+    reloadServices,
+    setService
   } = useContext(K8sContext)
   const [namespaceNames, setNamespaceNames] = useState<Array<string>>([])
 
@@ -44,8 +39,11 @@ const Settings: FC = () => {
   }, [contexts, reloadContexts])
 
   useEffect(() => {
-    if (page === 1) reloadServices()
-  }, [page, currentNamespace, reloadServices])
+    if (page === 1) {
+      reloadServices()
+      setService(null)
+    }
+  }, [page, currentNamespace, reloadServices, setService])
 
   useEffect(() => {
     if (page === 1 && namespaces && namespaces.length > 0)
@@ -56,20 +54,33 @@ const Settings: FC = () => {
     if (!namespaces) reloadNamespaces()
   }, [namespaces, reloadNamespaces])
 
+  const multipleNamespaces = namespaces && namespaces.length > 0 ? true : false
+  const multipleCluster = contexts && contexts.contexts.length > 1 ? true : false
+
   return (
-    <SSettings>
-      {page > 0 && (
+    <SSettings direction="row">
+      {page > 0 && namespaces && (
         <Dropdown
-          width="150px"
+          margin="1rem 0 0"
+          width="100px"
+          disabled={!multipleNamespaces}
           options={namespaceNames}
           value={currentNamespace ? currentNamespace : ''}
           select={setNamespace}
         />
       )}
-      <Button margin="0 0 0 1rem">
-        <Icon type="cluster" color="white" size="0.75rem" iconSize="100%" margin="0 0.25rem 0 0" />
-        Change Cluster
-      </Button>
+      {contexts && (
+        <Dropdown
+          margin="1rem 1rem 0 1rem"
+          width="150px"
+          options={contexts.contexts}
+          value={contexts.activeContext}
+          select={(selection: string) => {
+            console.log(selection)
+          }}
+          disabled={!multipleCluster}
+        />
+      )}
     </SSettings>
   )
 }

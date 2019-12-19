@@ -8,12 +8,8 @@ const { createWindow } = require('./window')
 // ==============================================================
 try {
   app.on('ready', createWindow)
-
   app.on('window-all-closed', () => app.quit())
-
-  app.on('activate', () => {
-    if (mainWindow === null) createWindow()
-  })
+  app.on('activate', createWindow)
 } catch (error) {
   logError(error)
 }

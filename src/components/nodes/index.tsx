@@ -27,7 +27,7 @@ const Nodes: FC = () => {
   }, [page, reloadNodes])
 
   return (
-    <Box pad="2rem" width="inherit" height="inherit" justify="between">
+    <Box pad="1rem 2rem" width="inherit" height="inherit" justify="between">
       <Heading level="1" size="3rem" color={colors['blue']} margin="0">
         Nodes
       </Heading>

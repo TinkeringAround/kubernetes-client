@@ -6,7 +6,8 @@ const Request = require('kubernetes-client/backends/request')
 const { logError } = require('./logger')
 
 // ==============================================================
-let client, kubeconfig
+let client, kubeconfig, childProcess
+const disabledNamespaces = 'kube-node-lease kube-public kube-system'
 
 // ==============================================================
 function getContexts(event) {
@@ -90,8 +91,13 @@ async function getNodes(event) {
 async function getNamespaces(event) {
   try {
     const namespaces = await client.api.v1.namespaces.get()
+    const filteredNamespaces = namespaces.body.items.reduce((result, namespace) => {
+      if (!disabledNamespaces.includes(namespace.metadata.name)) result.push(namespace)
+      return result
+    }, [])
+
     event.returnValue = {
-      data: namespaces.body.items.map(namespace => {
+      data: filteredNamespaces.map(namespace => {
         return {
           name: namespace.metadata.name,
           status: namespace.status.phase.includes('ctive')
@@ -156,7 +162,28 @@ function portForwardToService(event, service, servicePort, targetPort) {
   try {
     var cmd = require('node-cmd')
     const command = `kubectl port-forward svc/${service} ${targetPort}:${servicePort}`
-    cmd.run(command)
+    childProcess = cmd.run(command)
+    console.debug('Started a new Child Process: ', childProcess)
+    event.returnValue = {
+      data: {},
+      error: null
+    }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
+      error: error
+    }
+  }
+}
+
+function stopPortForward(event) {
+  try {
+    if (childProcess) {
+      childProcess.kill(1)
+      childProcess = null
+    }
+
     event.returnValue = {
       data: {},
       error: null
@@ -191,4 +218,5 @@ ipcMain.on('nodes', getNodes)
 ipcMain.on('namespaces', getNamespaces)
 ipcMain.on('deployments', getDeploymentsInNamespace)
 ipcMain.on('services', getServicesInNamespace)
-ipcMain.on('portForwardToService', portForwardToService)
+ipcMain.on('startPortForwardToService', portForwardToService)
+ipcMain.on('stopPortForward', stopPortForward)

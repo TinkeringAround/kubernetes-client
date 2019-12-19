@@ -1,4 +1,5 @@
 import React, { FC, useContext } from 'react'
+import { Box } from 'grommet'
 
 // Styles
 import { sizes } from '../../styles'
@@ -17,30 +18,8 @@ const Navigation: FC = () => {
   const { page, setPage } = useContext(AppContext)
 
   return (
-    <div
-      style={{
-        width: sizes['navigation'],
-        height: '100%',
-
-        background: 'white',
-
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center'
-      }}
-    >
-      <div
-        style={{
-          height: '50%',
-          width: '100%',
-
-          marginTop: '1rem',
-
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
-        }}
-      >
+    <Box width={sizes['navigation'] + 'px'} height="100%" background="white">
+      <Box pad={{ top: '1rem' }} align="center">
         <Logo />
         <Icon
           type="server"
@@ -49,8 +28,8 @@ const Navigation: FC = () => {
           onClick={() => setPage(0)}
         />
         <Icon type="service" selected={page === 1} margin="0 0 .75rem" onClick={() => setPage(1)} />
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 

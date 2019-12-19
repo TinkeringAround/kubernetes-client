@@ -6,10 +6,10 @@ import { Box, Text } from 'grommet'
 import { colors } from '../styles'
 
 // Atoms
-const SSelect = styled.select`
+const SSelect = styled.select<{ disabled: boolean }>`
   padding: 0.5rem;
 
-  background: ${colors['grey']};
+  background: ${({ disabled }) => (disabled ? colors['lightGrey'] : colors['blue'])};
   border: none;
   border-radius: 5px;
 
@@ -20,7 +20,7 @@ const SSelect = styled.select`
   font-size: 0.75rem;
   font-weight: bold;
   text-align-last: center;
-  color: ${colors['black']};
+  color: ${({ disabled }) => (disabled ? colors['grey'] : colors['white'])};
 
   ::-ms-expand {
     display: none;
@@ -36,6 +36,7 @@ interface Props {
 
   width?: string
   margin?: string
+  disabled?: boolean
   style?: CSSProperties
 }
 
@@ -47,11 +48,12 @@ const Dropdown: FC<Props> = ({
   label = null,
   width = '25%',
   margin = '0',
+  disabled = false,
   style = undefined
 }) => (
   <Box margin={margin} width={width} style={style}>
     {label && (
-      <Text size="1rem" weight="bold" color={colors['grey']} margin="0 0 .25rem .25rem">
+      <Text size=".8rem" weight="bold" color={colors['black']}>
         {label}
       </Text>
     )}
@@ -59,6 +61,7 @@ const Dropdown: FC<Props> = ({
       id={'Selection-' + value}
       value={value}
       onChange={(event: any) => select(event.target.value)}
+      disabled={disabled}
     >
       {options.map((option: string, index: number) => (
         <option key={'Option-' + index}>{option}</option>

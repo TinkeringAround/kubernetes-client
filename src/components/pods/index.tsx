@@ -1,4 +1,4 @@
-import React, { FC, useContext, useCallback, useEffect } from 'react'
+import React, { FC, useContext, useEffect } from 'react'
 import { Box, Heading, Text } from 'grommet'
 
 // Styles
@@ -8,43 +8,28 @@ import { colors, sizes } from '../../styles'
 import { K8sContext, AppContext } from '../../context'
 
 // Types
-import { TService } from '../../types'
+import { TPod } from '../../types'
 
 // Components
-import Service from './service'
-
-// Driver
-import { startPortForwardToService, stopPortForward } from '../../driver/ipc'
+import Pod from './pod'
 
 // ==========================================================
-const Services: FC = () => {
+const Pods: FC = () => {
   const { page } = useContext(AppContext)
-  const { services, currentService, setService, reloadServices, currentNamespace } = useContext(
-    K8sContext
-  )
-
-  const toggleService = useCallback(
-    (service: TService) => {
-      if (currentService?.name === service.name) stopPortForward()
-      else startPortForwardToService(service, 35000)
-
-      setService(currentService?.name === service.name ? null : service)
-    },
-    [currentService, setService]
-  )
+  const { currentNamespace, reloadPods, pods } = useContext(K8sContext)
 
   useEffect(() => {
-    if (page === 1 && currentNamespace) reloadServices(currentNamespace)
-  }, [page, currentNamespace, reloadServices])
+    if (page === 2 && currentNamespace) reloadPods(currentNamespace)
+  }, [page, currentNamespace, reloadPods])
 
   return (
     <Box pad="1rem 2rem" width="inherit" height="inherit" justify="between">
       <Heading level="1" size="3rem" color={colors['blue']} margin="0">
-        Services
+        Pods
       </Heading>
 
       <Box height="85%" width="100%" align="center">
-        {/* Service Header */}
+        {/* Pods Header */}
         <Box
           width="100%"
           direction="row"
@@ -57,14 +42,14 @@ const Services: FC = () => {
               Name
             </Text>
           </Box>
-          <Box width="10%" align="center">
+          <Box width="15%" align="center">
             <Text size={sizes['tableHeader']} weight="bold" color={colors['black']}>
-              Type
+              Containers
             </Text>
           </Box>
-          <Box width="10%" align="center">
+          <Box width="15%" align="center">
             <Text size={sizes['tableHeader']} weight="bold" color={colors['black']}>
-              Ports
+              Creation
             </Text>
           </Box>
           <Box width="15%" align="center">
@@ -74,19 +59,11 @@ const Services: FC = () => {
           </Box>
         </Box>
 
-        {/* Services */}
-        {services &&
-          services.map((service: TService, index: number) => (
-            <Service
-              key={'Service-' + index}
-              service={service}
-              select={toggleService}
-              active={currentService?.name === service.name}
-            />
-          ))}
+        {/*  Pods */}
+        {pods && pods.map((pod: TPod, index: number) => <Pod key={'Pod-' + index} pod={pod} />)}
       </Box>
     </Box>
   )
 }
 
-export default Services
+export default Pods

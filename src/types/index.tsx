@@ -14,8 +14,12 @@ declare global {
 
 // ==========================================================
 export type TResponse = {
-  data: TContexts | TNodes | TNamespaces | TServices | null
+  data: TContexts | TNodes | TNamespaces | TServices | TSuccess | TPods | null
   error: string | null
+}
+
+export type TSuccess = {
+  success: boolean
 }
 
 export type TError = {
@@ -83,4 +87,19 @@ export type TServicePort = {
   name: string
   port: number
   protocol: string
+}
+// ==========================================================
+export type TPods = Array<TPod>
+
+export type TPod = {
+  name: string
+  creation: string
+  containers: Array<TContainer>
+}
+
+export type TContainer = {
+  name: string
+  image: string
+  running: boolean
+  restartCount: number
 }

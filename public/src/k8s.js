@@ -1,17 +1,20 @@
 const { app, ipcMain } = require('electron')
 const { KubeConfig, Client } = require('kubernetes-client')
 const Request = require('kubernetes-client/backends/request')
+var cmd = require('node-cmd')
 
 // Packages
-const { logError } = require('./logger')
+const { logError, logInfo } = require('./logger')
 
 // ==============================================================
-let client, kubeconfig, childProcess
+let client, kubeconfig
+let childProcesses = []
 const disabledNamespaces = 'kube-node-lease kube-public kube-system'
 
 // ==============================================================
 function getContexts(event) {
   try {
+    logInfo('Fetching Contexts from Kubeconfig.')
     event.returnValue = {
       data: {
         activeContext: kubeconfig.currentContext,
@@ -30,6 +33,7 @@ function getContexts(event) {
 
 async function getNodes(event) {
   try {
+    logInfo('Fetching Nodes via Client.')
     const nodes = await client.api.v1.nodes.get()
     event.returnValue = {
       data: nodes.body.items.map(node => {
@@ -90,6 +94,7 @@ async function getNodes(event) {
 
 async function getNamespaces(event) {
   try {
+    logInfo('Fetching Namespaces via Client.')
     const namespaces = await client.api.v1.namespaces.get()
     const filteredNamespaces = namespaces.body.items.reduce((result, namespace) => {
       if (!disabledNamespaces.includes(namespace.metadata.name)) result.push(namespace)
@@ -116,6 +121,7 @@ async function getNamespaces(event) {
 
 async function getDeploymentsInNamespace(event, namespace) {
   try {
+    logInfo('Fetching Deployments via Client.')
     const deployments = await client.apis.apps.v1.namespaces(namespace).deployments.get()
     event.returnValue = {
       data: deployments.body.items,
@@ -132,6 +138,9 @@ async function getDeploymentsInNamespace(event, namespace) {
 
 async function getServicesInNamespace(event, namespace) {
   try {
+    if (!namespace) throw new Error('No Namespace provided.')
+
+    logInfo(`Fetching Services in Namespace "${namespace}" via Client.`)
     let services = await client.api.v1.namespaces(namespace).services.get()
     event.returnValue = {
       data: services.body.items.map(service => {
@@ -158,14 +167,57 @@ async function getServicesInNamespace(event, namespace) {
   }
 }
 
-function portForwardToService(event, service, servicePort, targetPort) {
+async function getPodsInNamespace(event, namespace) {
   try {
-    var cmd = require('node-cmd')
-    const command = `kubectl port-forward svc/${service} ${targetPort}:${servicePort}`
-    childProcess = cmd.run(command)
-    console.debug('Started a new Child Process: ', childProcess)
+    if (!namespace) throw new Error('No Namespace provided.')
+    logInfo(`Fetching Pods in Namespace "${namespace}" via Client.`)
+    let pods = await client.api.v1.namespaces(namespace).pods.get()
     event.returnValue = {
-      data: {},
+      data: pods.body.items.map(pod => {
+        return {
+          name: pod.metadata.name,
+          creation: pod.metadata.creationTimestamp,
+          containers: pod.status.containerStatuses.map(container => {
+            return {
+              name: container.name,
+              image: container.image,
+              running: container.ready,
+              restartCount: container.restartCount
+            }
+          })
+        }
+      }),
+      error: null
+    }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
+      error: error
+    }
+  }
+}
+
+function portForwardToService(event, service, targetPort) {
+  try {
+    stopPortForward()
+
+    service.ports.forEach((port, index) => {
+      const command = `kubectl port-forward svc/${service.name} ${targetPort + index}:${port.port}`
+      const child = cmd.run(command)
+      childProcesses.push(child)
+
+      logInfo(
+        `Started PF for Service "${service.name}" => ${port.port}:${targetPort + index}, PID: ${
+          child.pid
+        }`
+      )
+    })
+
+    event.returnValue = {
+      data: {
+        success: true
+      },
       error: null
     }
   } catch (error) {
@@ -179,21 +231,26 @@ function portForwardToService(event, service, servicePort, targetPort) {
 
 function stopPortForward(event) {
   try {
-    if (childProcess) {
-      childProcess.kill(1)
-      childProcess = null
-    }
+    childProcesses.forEach(child => {
+      child.kill(1)
+      logInfo('Stopped running Child Process with PID ' + child.pid)
+    })
+    childProcesses = []
 
-    event.returnValue = {
-      data: {},
-      error: null
-    }
+    if (event)
+      event.returnValue = {
+        data: {
+          success: true
+        },
+        error: null
+      }
   } catch (error) {
     logError(error)
-    event.returnValue = {
-      data: null,
-      error: error
-    }
+    if (event)
+      event.returnValue = {
+        data: null,
+        error: error
+      }
   }
 }
 
@@ -206,7 +263,7 @@ function stopPortForward(event) {
     const backend = new Request({ kubeconfig })
     client = new Client({ backend, version: '1.13' })
 
-    console.debug('Client initialized.')
+    logInfo('Client has been initialized.')
   } catch (error) {
     logError(error)
   }
@@ -218,5 +275,11 @@ ipcMain.on('nodes', getNodes)
 ipcMain.on('namespaces', getNamespaces)
 ipcMain.on('deployments', getDeploymentsInNamespace)
 ipcMain.on('services', getServicesInNamespace)
+ipcMain.on('pods', getPodsInNamespace)
 ipcMain.on('startPortForwardToService', portForwardToService)
 ipcMain.on('stopPortForward', stopPortForward)
+
+// ==============================================================
+module.exports = {
+  stopPortForward
+}

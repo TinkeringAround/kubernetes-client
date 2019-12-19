@@ -1,4 +1,4 @@
-import React, { FC, Fragment } from 'react'
+import React, { FC } from 'react'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 
@@ -25,7 +25,7 @@ const SService = styled(Box)<{ active: boolean }>`
   justify-content: space-between;
 
   transition: all 0.25s ease;
-  cursor: pointer;
+  cursor: default;
 
   :hover {
     transform: translateX(-5px);
@@ -53,43 +53,41 @@ interface Props {
 
 // ==========================================================
 const Service: FC<Props> = ({ service, active, select, onDoubleClick = undefined }) => (
-  <Fragment>
-    <SService
-      active={active}
-      onDoubleClick={onDoubleClick ? () => onDoubleClick(service) : undefined}
-    >
-      <Box width="30%" pad={{ left: '1rem' }}>
-        <Text size="0.9rem" weight="bold" color={active ? 'white' : colors['black']} truncate>
-          {service.name}
+  <SService
+    active={active}
+    onDoubleClick={onDoubleClick ? () => onDoubleClick(service) : undefined}
+  >
+    <Box width="30%" pad={{ left: '1rem' }}>
+      <Text size="0.8rem" weight="bold" color={active ? 'white' : colors['black']} truncate>
+        {service.name}
+      </Text>
+    </Box>
+    <SServiceType active={active}>
+      <Text size="0.65rem" weight="bold" color={active ? colors['blue'] : 'white'}>
+        {service.type}
+      </Text>
+    </SServiceType>
+    <Box width="10%" align="center">
+      {service.ports.map((port: TServicePort, index: number) => (
+        <Text
+          key={'Service-Port-' + index}
+          size="0.65rem"
+          color={active ? 'white' : colors['black']}
+        >
+          <strong>{port.name + ': '}</strong>
+          {port.port}
         </Text>
-      </Box>
-      <SServiceType active={active}>
-        <Text size="0.65rem" weight="bold" color={active ? colors['blue'] : 'white'}>
-          {service.type}
-        </Text>
-      </SServiceType>
-      <Box width="10%" align="center">
-        {service.ports.map((port: TServicePort, index: number) => (
-          <Text
-            key={'Service-Port-' + index}
-            size="0.65rem"
-            color={active ? 'white' : colors['black']}
-          >
-            <strong>{port.name + ': '}</strong>
-            {port.port}
-          </Text>
-        ))}
-      </Box>
-      <Box width="15%" justify="center" direction="row">
-        <Icon
-          type={active ? 'stop' : 'start'}
-          color={active ? 'white' : 'blue'}
-          size="2rem"
-          onClick={() => select(service)}
-        />
-      </Box>
-    </SService>
-  </Fragment>
+      ))}
+    </Box>
+    <Box width="15%" justify="center" direction="row">
+      <Icon
+        type={active ? 'stop' : 'start'}
+        color={active ? 'white' : 'blue'}
+        size="2.5rem"
+        onClick={() => select(service)}
+      />
+    </Box>
+  </SService>
 )
 
 export default Service

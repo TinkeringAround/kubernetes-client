@@ -3,7 +3,7 @@ const path = require('path')
 const isDev = require('electron-is-dev')
 
 // Packages
-const { logError } = require('./src/logger')
+const { logError, logInfo } = require('./src/logger')
 
 // ==============================================================
 let mainWindow
@@ -28,6 +28,7 @@ function createWindow() {
       )
 
       mainWindow.on('closed', () => (mainWindow = null))
+      logInfo('Main Window Creation was successful.')
     }
   } catch (error) {
     logError(error)

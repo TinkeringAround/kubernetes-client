@@ -33,5 +33,7 @@ export const colors = {
 
 // ==========================================================
 export const sizes = {
-  navigation: 70
+  navigation: 70,
+
+  tableHeader: '.65rem'
 }

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
 
 // Types
-import { TContexts, TError, TNodes, TNamespaces, TNamespace, TServices, TService } from './types'
+import { TContexts, TError, TNodes, TNamespaces, TServices, TService, TPods } from './types'
 
 // Styles
 import './styles/global.css'
@@ -15,9 +15,10 @@ import { AppContext, K8sContext } from './context'
 import Layout from './components/layout'
 import Nodes from './components/nodes'
 import Services from './components/services'
+import Pods from './components/pods'
 
 // Driver
-import { getContexts, getNodes, getNamespaces, getServices } from './driver/ipc'
+import { getContexts, getNodes, getNamespaces, getServices, getPods } from './driver/ipc'
 
 // ==========================================================
 const App: FC = () => {
@@ -31,6 +32,7 @@ const App: FC = () => {
   const [namespaces, setNamespaces] = useState<TNamespaces | null>(null)
   const [currentService, setCurrentService] = useState<TService | null>(null)
   const [services, setServices] = useState<TServices | null>(null)
+  const [pods, setPods] = useState<TPods | null>(null)
 
   // ==========================================================
   const reloadContexts = useCallback(() => {
@@ -49,47 +51,44 @@ const App: FC = () => {
     return loadedNodes
   }, [])
 
-  const setActiveNamespace = useCallback(
-    (newNamespace: string) => {
-      if (namespaces && currentNamespace) {
-        const ns: TNamespace | undefined = namespaces.find(n => n.name.includes(newNamespace))
-        if (ns && !currentNamespace.includes(newNamespace)) setCurrentNamespace(newNamespace)
-      }
-    },
-    [namespaces, currentNamespace, setCurrentNamespace]
-  )
+  const setActiveNamespace = useCallback((newNamespace: string) => {
+    setCurrentNamespace(newNamespace)
+  }, [])
 
   const reloadNamespaces = useCallback(() => {
     const loadedNamespaces = getNamespaces()
     if ('error' in loadedNamespaces) setError(loadedNamespaces)
     else setNamespaces(loadedNamespaces)
 
-    if (currentNamespace) setActiveNamespace(currentNamespace)
-
     return loadedNamespaces
-  }, [currentNamespace, setActiveNamespace])
+  }, [])
 
-  const reloadServices = useCallback(() => {
-    if (currentNamespace) {
-      const loadedServices = getServices(currentNamespace)
-      if ('error' in loadedServices) setError(loadedServices)
-      else setServices(loadedServices)
+  const reloadServices = useCallback((namespace: string) => {
+    const loadedServices = getServices(namespace)
+    if ('error' in loadedServices) setError(loadedServices)
+    else setServices(loadedServices)
 
-      return loadedServices
-    } else
-      return {
-        message: 'An error occured fetching Services.',
-        error: 'No namespace provided.'
-      }
-  }, [currentNamespace])
+    return loadedServices
+  }, [])
 
-  const setActiveService = useCallback((service: TService | null) => {
-    // if (currentService) {
-    //   // Stop other Port Forwarding First
-    //   // Then start new one
-    // }
-    console.info('New selected Service: ', service ? service.name : 'Null')
-    setCurrentService(service)
+  const setActiveService = useCallback(
+    (service: TService | null) => {
+      if (
+        (service && !currentService) ||
+        (!service && currentService) ||
+        (service && currentService && service.name !== currentService.name)
+      )
+        setCurrentService(service)
+    },
+    [currentService]
+  )
+
+  const reloadPods = useCallback((namespace: string) => {
+    const loadedPods = getPods(namespace)
+    if ('error' in loadedPods) setError(loadedPods)
+    else setPods(loadedPods)
+
+    return loadedPods
   }, [])
 
   // ==========================================================
@@ -121,12 +120,16 @@ const App: FC = () => {
           currentService: currentService,
           setService: setActiveService,
           services: services,
-          reloadServices: reloadServices
+          reloadServices: reloadServices,
+
+          pods: pods,
+          reloadPods: reloadPods
         }}
       >
         <Layout>
           {page === 0 && <Nodes />}
           {page === 1 && <Services />}
+          {page === 2 && <Pods />}
         </Layout>
       </K8sContext.Provider>
     </AppContext.Provider>

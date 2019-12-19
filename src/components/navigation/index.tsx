@@ -28,6 +28,7 @@ const Navigation: FC = () => {
           onClick={() => setPage(0)}
         />
         <Icon type="service" selected={page === 1} margin="0 0 .75rem" onClick={() => setPage(1)} />
+        <Icon type="pod" selected={page === 2} onClick={() => setPage(2)} />
       </Box>
     </Box>
   )

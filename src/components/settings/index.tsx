@@ -28,9 +28,7 @@ const Settings: FC = () => {
     namespaces,
     currentNamespace,
     setNamespace,
-    reloadNamespaces,
-    reloadServices,
-    setService
+    reloadNamespaces
   } = useContext(K8sContext)
   const [namespaceNames, setNamespaceNames] = useState<Array<string>>([])
 
@@ -39,14 +37,7 @@ const Settings: FC = () => {
   }, [contexts, reloadContexts])
 
   useEffect(() => {
-    if (page === 1) {
-      reloadServices()
-      setService(null)
-    }
-  }, [page, currentNamespace, reloadServices, setService])
-
-  useEffect(() => {
-    if (page === 1 && namespaces && namespaces.length > 0)
+    if (page > 0 && namespaces && namespaces.length > 0)
       setNamespaceNames(namespaces.map((ns: TNamespace) => ns.name))
   }, [page, namespaces])
 

@@ -66,6 +66,13 @@ const Pods: FC = () => {
               new Date(a.creation).getTime() - new Date(b.creation).getTime() > 0 ? -1 : 1
             )
             .map((pod: TPod, index: number) => <Pod key={'Pod-' + index} pod={pod} />)}
+
+        {!pods ||
+          (pods && pods.length === 0 && (
+            <Text size="0.8rem" margin="1rem" alignSelf="start" color={colors['black']}>
+              No Pods in this Namespace.
+            </Text>
+          ))}
       </Box>
     </Box>
   )

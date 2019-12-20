@@ -1,6 +1,7 @@
 import React, { FC, useState, useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
+import { PoseGroup } from 'react-pose'
 
 // Types
 import { TContexts, TError, TNodes, TNamespaces, TServices, TService, TPods } from './types'
@@ -11,11 +12,15 @@ import './styles/global.css'
 // Context
 import { AppContext, K8sContext } from './context'
 
+// Atoms
+import { APage } from './atoms/animations'
+
 // Components
 import Layout from './components/layout'
 import Nodes from './components/nodes'
 import Services from './components/services'
 import Pods from './components/pods'
+import ErrorDialog from './components/ErrorDialog'
 
 // Driver
 import { getContexts, getNodes, getNamespaces, getServices, getPods } from './driver/ipc'
@@ -127,9 +132,27 @@ const App: FC = () => {
         }}
       >
         <Layout>
-          {page === 0 && <Nodes />}
-          {page === 1 && <Services />}
-          {page === 2 && <Pods />}
+          {/* Content */}
+          <PoseGroup flipMove={false}>
+            {page === 0 && (
+              <APage key="Nodes">
+                <Nodes />
+              </APage>
+            )}
+            {page === 1 && (
+              <APage key="Services">
+                <Services />
+              </APage>
+            )}
+            {page === 2 && (
+              <APage key="Pods">
+                <Pods />
+              </APage>
+            )}
+          </PoseGroup>
+
+          {/* Dialogs */}
+          <ErrorDialog error={error} close={() => setError(null)} />
         </Layout>
       </K8sContext.Provider>
     </AppContext.Provider>

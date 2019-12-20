@@ -16,7 +16,7 @@ const SSettings = styled(Box)`
   position: fixed;
   top: 1rem;
   right: 1rem;
-  z-index: 100;
+  z-index: 10;
 `
 
 // ==========================================================

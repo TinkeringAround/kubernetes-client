@@ -43,7 +43,7 @@ const Button: FC<Props> = ({
 
       fontSize: fontSize,
       fontWeight: 'bold',
-      color: colors[color],
+      color: disabled ? colors['grey'] : colors[color],
 
       background: disabled ? colors['lightGrey'] : colors[background],
       borderRadius: 5,

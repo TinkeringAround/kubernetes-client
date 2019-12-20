@@ -84,6 +84,13 @@ const Services: FC = () => {
               active={currentService?.name === service.name}
             />
           ))}
+
+        {!services ||
+          (services && services.length === 0 && (
+            <Text size="0.8rem" margin="1rem" alignSelf="start" color={colors['black']}>
+              No Services in this Namespace.
+            </Text>
+          ))}
       </Box>
     </Box>
   )

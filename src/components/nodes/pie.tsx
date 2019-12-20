@@ -97,7 +97,7 @@ const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 
             direction="row"
             pad="0.5rem"
             align="center"
-            background={colors[healthy ? 'blue' : 'red']}
+            background={colors[healthy ? 'green' : 'red']}
             style={{ borderRadius: 5 }}
           >
             <Icon
@@ -106,7 +106,7 @@ const NodePie: FC<Props> = ({ node, width = '45%', height = '100%', margin = '0 
               color="white"
               margin="0 0.5rem 0 0"
             />
-            <Text size="0.75rem" weight="bold" margin="0 0.5rem 0 0">
+            <Text size="0.75rem" weight="bold" margin="0 0.5rem 0 0" color="white">
               {healthy ? 'Ready' : 'Error'}
             </Text>
           </Box>

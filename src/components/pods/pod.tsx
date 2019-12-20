@@ -1,6 +1,7 @@
 import React, { FC } from 'react'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
+import ReactTooltip from 'react-tooltip'
 
 // Types
 import { TPod, TContainer } from '../../types'
@@ -10,6 +11,7 @@ import { colors } from '../../styles'
 
 // Atoms
 import Icon from '../../atoms/icons'
+import { getTimestamp } from '../../driver/time'
 
 // ==========================================================
 const SPod = styled(Box)`
@@ -37,7 +39,7 @@ const SContainer = styled(Box)<{ running: boolean }>`
   width: 20px;
   height: 20px;
 
-  background: ${({ running }) => colors[running ? 'blue' : 'red']};
+  background: ${({ running }) => colors[running ? 'green' : 'red']};
   border-radius: 10px;
 `
 
@@ -56,12 +58,24 @@ const Pod: FC<Props> = ({ pod }) => (
     </Box>
     <Box width="15%" align="center">
       {pod.containers.map((container: TContainer, index: number) => (
-        <SContainer key={'Service-Port-' + index} running={container.running} />
+        <SContainer
+          key={'Service-Port-' + index}
+          data-for={'Pod-Tooltip-' + index}
+          data-tip={`<span><strong>Name: </strong>${
+            container.name
+          }</span><br /><span><strong>Version: </strong>${
+            container.image.split(':')[1]
+          }</span><br /><span><strong>Restarts: </strong>${container.restartCount}</span>`}
+          data-html={true}
+          running={container.running}
+        >
+          <ReactTooltip id={'Pod-Tooltip-' + index} />
+        </SContainer>
       ))}
     </Box>
-    <Box width="15%">
+    <Box width="15%" align="center">
       <Text size="0.65rem" weight="bold" color={colors['black']}>
-        {pod.creation}
+        {getTimestamp(pod.creation)}
       </Text>
     </Box>
 
@@ -70,5 +84,4 @@ const Pod: FC<Props> = ({ pod }) => (
     </Box>
   </SPod>
 )
-
 export default Pod

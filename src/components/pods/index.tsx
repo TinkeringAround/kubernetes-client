@@ -60,7 +60,12 @@ const Pods: FC = () => {
         </Box>
 
         {/*  Pods */}
-        {pods && pods.map((pod: TPod, index: number) => <Pod key={'Pod-' + index} pod={pod} />)}
+        {pods &&
+          pods
+            .sort((a: TPod, b: TPod) =>
+              new Date(a.creation).getTime() - new Date(b.creation).getTime() > 0 ? -1 : 1
+            )
+            .map((pod: TPod, index: number) => <Pod key={'Pod-' + index} pod={pod} />)}
       </Box>
     </Box>
   )

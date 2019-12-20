@@ -13,6 +13,7 @@ export type TColor =
   | 'red'
   | 'blue'
   | 'darkBlue'
+  | 'green'
 
 export const colors = {
   // Effects
@@ -28,7 +29,8 @@ export const colors = {
   grey: 'rgb(200,200,200)',
   red: '#E63946',
   blue: 'rgba(50, 120, 225, 1)',
-  darkBlue: '#134074'
+  darkBlue: '#134074',
+  green: '#59C9A5'
 }
 
 // ==========================================================

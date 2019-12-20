@@ -168,7 +168,7 @@ const Icon: FC<Props> = ({
               ? 'transparent'
               : selected
               ? colors['blue']
-              : hovered
+              : hovered && onClick
               ? colors['hoverBlue']
               : 'transparent',
             borderRadius: 5,

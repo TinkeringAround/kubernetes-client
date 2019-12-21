@@ -7,7 +7,10 @@ import {
   TNamespaces,
   TServices,
   TService,
-  TPods
+  TPods,
+  TLog,
+  TPod,
+  TLogLimit
 } from '../types'
 
 // Consts
@@ -81,6 +84,25 @@ export const getPods: (namespace: string | null) => TPods | TError = (namespace:
   console.info('Pods: ', response.data)
 
   if (response.data) return response.data as TPods
+  else {
+    console.error(response.error)
+    return {
+      message: 'An unexpected error occured.',
+      error: response.error ? response.error : 'Unkown Error.'
+    }
+  }
+}
+
+// ==========================================================
+export const getLogsForPod: (
+  namespace: string | null,
+  pod: TPod | null,
+  limit: TLogLimit
+) => TLog | TError = (namespace: string | null, pod: TPod | null, limit: TLogLimit) => {
+  const response: TResponse = ipcRenderer.sendSync('logs', namespace, pod, limit)
+  console.info('Logs: ', response.data)
+
+  if (response.data) return response.data as TLog
   else {
     console.error(response.error)
     return {

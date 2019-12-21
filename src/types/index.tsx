@@ -14,7 +14,7 @@ declare global {
 
 // ==========================================================
 export type TResponse = {
-  data: TContexts | TNodes | TNamespaces | TServices | TSuccess | TPods | null
+  data: TContexts | TNodes | TNamespaces | TServices | TSuccess | TPods | TLog | null
   error: string | null
 }
 
@@ -88,6 +88,7 @@ export type TServicePort = {
   port: number
   protocol: string
 }
+
 // ==========================================================
 export type TPods = Array<TPod>
 
@@ -103,3 +104,7 @@ export type TContainer = {
   running: boolean
   restartCount: number
 }
+
+// ==========================================================
+export type TLog = Array<string>
+export type TLogLimit = '10' | '25' | '50' | '100' | '250' | '500'

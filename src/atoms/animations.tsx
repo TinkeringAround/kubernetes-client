@@ -57,16 +57,43 @@ const SErrorDialog = styled(Box)`
   top: 2rem;
   right: 2rem;
   z-index: 80;
+
   width: 350px;
   height: 175px;
   padding: 1rem;
+
   background: ${colors['white']};
   box-shadow: 0px 0px 20px 1px rgba(200, 214, 216, 0.25);
   border-radius: 15px;
+
   justify-content: space-between;
 `
 
 export const AErrorDialog = posed(SErrorDialog)({
   exit: { opacity: 0, top: '0rem', transition: { duration: DURATION } },
   enter: { opacity: 1, top: '2rem', transition: { duration: DURATION } }
+})
+
+// ===================================================================
+const SLogDialog = styled(Box)`
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 70;
+
+  width: 85vw;
+  height: 90vh;
+  padding: 1.5rem 2rem;
+
+  background: ${colors['white']};
+  box-shadow: 0px 0px 20px 1px rgba(200, 214, 216, 0.25);
+  border-radius: 15px;
+
+  justify-content: space-between;
+`
+
+export const ALogDialog = posed(SLogDialog)({
+  exit: { opacity: 0, top: '45%', transition: { duration: DURATION } },
+  enter: { opacity: 1, top: '50%', transition: { duration: DURATION } }
 })

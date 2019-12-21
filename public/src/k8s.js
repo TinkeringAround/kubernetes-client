@@ -198,6 +198,35 @@ async function getPodsInNamespace(event, namespace) {
   }
 }
 
+async function getLogsForPodInNamespace(event, namespace, pod, limit = '10') {
+  try {
+    if (!namespace) throw new Error('No valid Namespace provided.')
+    if (!pod) throw new Error('No valid Pod provided.')
+
+    logInfo(`Fetching Logs for ${pod.name} in Namespace "${namespace}" via Client.`)
+    let logs = await client.api.v1
+      .namespaces(namespace)
+      .pods(pod.name)
+      .log.get({
+        qs: {
+          pretty: true,
+          tailLines: parseInt(limit)
+        }
+      })
+
+    event.returnValue = {
+      data: logs.body.split('\n'),
+      error: null
+    }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
+      error: error
+    }
+  }
+}
+
 function portForwardToService(event, service, targetPort) {
   try {
     stopPortForward()
@@ -276,6 +305,7 @@ ipcMain.on('namespaces', getNamespaces)
 ipcMain.on('deployments', getDeploymentsInNamespace)
 ipcMain.on('services', getServicesInNamespace)
 ipcMain.on('pods', getPodsInNamespace)
+ipcMain.on('logs', getLogsForPodInNamespace)
 ipcMain.on('startPortForwardToService', portForwardToService)
 ipcMain.on('stopPortForward', stopPortForward)
 

@@ -64,7 +64,9 @@ const Dropdown: FC<Props> = ({
       disabled={disabled}
     >
       {options.map((option: string, index: number) => (
-        <option key={'Option-' + index}>{option}</option>
+        <option key={'Option-' + index} value={option}>
+          {option}
+        </option>
       ))}
     </SSelect>
   </Box>

@@ -20,7 +20,7 @@ import Layout from './components/layout'
 import Nodes from './components/nodes'
 import Services from './components/services'
 import Pods from './components/pods'
-import ErrorDialog from './components/ErrorDialog'
+import ErrorDialog from './components/dialogs/error'
 
 // Driver
 import { getContexts, getNodes, getNamespaces, getServices, getPods } from './driver/ipc'

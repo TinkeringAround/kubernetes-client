@@ -97,6 +97,15 @@ const Pod: FC<Props> = ({ pod }) => {
     loadLogs(newLimit)
   }, [])
 
+  const formatImageName = useCallback((imageName: string) => {
+    var split = imageName.split(':')[0].split('/')
+    var image = split[split.length - 1]
+    var tag = imageName.split(':')[1]
+    if (tag.length > 15) tag = tag.substring(0, 15) + '...'
+
+    return image + ':' + tag
+  }, [])
+
   return (
     <Fragment>
       {/* Pod */}
@@ -113,9 +122,9 @@ const Pod: FC<Props> = ({ pod }) => {
               data-for={'Pod-Tooltip-' + index}
               data-tip={`<span><strong>Name: </strong>${
                 container.name
-              }</span><br /><span><strong>Version: </strong>${
-                container.image.split(':')[1]
-              }</span><br /><span><strong>Restarts: </strong>${container.restartCount}</span>`}
+              }</span><br /><span><strong>Version: </strong>${formatImageName(
+                container.image
+              )}</span><br /><span><strong>Restarts: </strong>${container.restartCount}</span>`}
               data-html={true}
               running={container.running}
             >

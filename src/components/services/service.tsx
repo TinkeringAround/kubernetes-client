@@ -14,7 +14,7 @@ import Icon from '../../atoms/icons'
 // ==========================================================
 const SService = styled(Box)<{ active: boolean }>`
   width: 100%;
-  height: 50px;
+  height: 3.25rem;
   margin-bottom: 1rem;
 
   background: ${({ active }) => (active ? colors['blue'] : 'white')};

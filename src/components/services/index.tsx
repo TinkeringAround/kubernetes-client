@@ -19,9 +19,14 @@ import { startPortForwardToService, stopPortForward } from '../../driver/ipc'
 // ==========================================================
 const Services: FC = () => {
   const { page } = useContext(AppContext)
-  const { services, currentService, setService, reloadServices, currentNamespace } = useContext(
-    K8sContext
-  )
+  const {
+    contexts,
+    services,
+    currentService,
+    setService,
+    reloadServices,
+    currentNamespace
+  } = useContext(K8sContext)
 
   const toggleService = useCallback(
     (service: TService) => {
@@ -34,8 +39,8 @@ const Services: FC = () => {
   )
 
   useEffect(() => {
-    if (page === 1 && currentNamespace) reloadServices(currentNamespace)
-  }, [page, currentNamespace, reloadServices])
+    if (page === 1 && contexts && currentNamespace) reloadServices(currentNamespace)
+  }, [page, contexts, currentNamespace, reloadServices])
 
   return (
     <Box pad="1rem 2rem" width="inherit" height="inherit" justify="between">

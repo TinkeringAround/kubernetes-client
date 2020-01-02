@@ -9,7 +9,7 @@ import { colors } from '../styles'
 const SSelect = styled.select<{ disabled: boolean }>`
   padding: 0.5rem;
 
-  background: ${({ disabled }) => (disabled ? colors['lightGrey'] : colors['blue'])};
+  background: ${({ disabled }) => (disabled ? colors['grey'] : colors['blue'])};
   border: none;
   border-radius: 5px;
 
@@ -20,7 +20,7 @@ const SSelect = styled.select<{ disabled: boolean }>`
   font-size: 0.75rem;
   font-weight: bold;
   text-align-last: center;
-  color: ${({ disabled }) => (disabled ? colors['grey'] : colors['white'])};
+  color: ${({ disabled }) => (disabled ? colors['lightGrey'] : colors['white'])};
 
   ::-ms-expand {
     display: none;

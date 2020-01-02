@@ -9,7 +9,7 @@ interface Props {
 }
 
 // ==========================================================
-const Logo: FC<Props> = ({ size = '50px' }) => (
+const Logo: FC<Props> = ({ size = '3rem' }) => (
   <img alt="K8s Logo" src={logo} style={{ width: size, height: size }} />
 )
 

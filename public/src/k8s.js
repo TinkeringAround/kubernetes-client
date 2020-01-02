@@ -1,17 +1,128 @@
-const { app, ipcMain } = require('electron')
+const { ipcMain } = require('electron')
 const { KubeConfig, Client } = require('kubernetes-client')
 const Request = require('kubernetes-client/backends/request')
 var cmd = require('node-cmd')
 
 // Packages
 const { logError, logInfo } = require('./logger')
+const { CONFIG, DISABLED_NAMESPACES } = require('./consts')
 
 // ==============================================================
-let client, kubeconfig
+let client, backend, kubeconfig
 let childProcesses = []
-const disabledNamespaces = 'kube-node-lease kube-public kube-system'
 
 // ==============================================================
+function setupKubeconfig() {
+  kubeconfig = new KubeConfig()
+  kubeconfig.loadFromFile(CONFIG)
+
+  backend = new Request({ kubeconfig })
+  client = new Client({ backend, version: '1.13' })
+
+  logInfo('Client setup was successful.')
+}
+
+// ==============================================================
+function setKubeconfig(event, configFiles) {
+  try {
+    const fs = require('fs')
+    const yaml = require('yaml')
+    const path = require('path')
+
+    // New Config
+    var newConfig = {
+      apiVersion: 'v1',
+      clusters: [],
+      contexts: [],
+      'current-context': '',
+      kind: 'Config',
+      preferences: {},
+      users: []
+    }
+
+    // Transfer old Values
+    if (kubeconfig.hasOwnProperty('clusters')) {
+      newConfig.clusters = kubeconfig.clusters
+      newConfig.contexts = kubeconfig.contexts
+      newConfig['current-context'] = kubeconfig.currentContext
+      newConfig.users = kubeconfig.users
+    }
+
+    // Load Config
+    configFiles.forEach(config => {
+      try {
+        const loadedConfig = yaml.parse(fs.readFileSync(path.resolve(config), 'utf-8'))
+        if (loadedConfig) {
+          newConfig.clusters = [
+            ...newConfig.clusters.map(clstr => {
+              return {
+                name: clstr.name,
+                cluster: {
+                  'certificate-authority-data': clstr.caData,
+                  server: clstr.server
+                }
+              }
+            }),
+            ...loadedConfig.clusters
+          ]
+          newConfig.contexts = [
+            ...newConfig.contexts.map(ctx => {
+              return {
+                name: ctx.name,
+                context: {
+                  cluster: ctx.cluster,
+                  namespace: ctx.namespace,
+                  user: ctx.user
+                }
+              }
+            }),
+            ...loadedConfig.contexts
+          ]
+          newConfig.users = [
+            ...newConfig.users.map(usr => {
+              return {
+                name: usr.name,
+                user: {
+                  'client-certificate-data': usr.certData,
+                  'client-key-data': usr.keyData
+                }
+              }
+            }),
+            ...loadedConfig.users
+          ]
+        }
+      } catch (e) {
+        logError('Could not open File.')
+      }
+    })
+
+    // Set Current Index when not set
+    if (newConfig['current-context'] == '' && newConfig.contexts.length > 0)
+      newConfig['current-context'] = newConfig.contexts[0].name
+
+    // Save new Document
+    if (fs.existsSync(CONFIG)) fs.unlinkSync(CONFIG)
+    fs.appendFileSync(CONFIG, yaml.stringify(newConfig))
+
+    // Reload Kubeconfig
+    setupKubeconfig()
+    logInfo('Kubeconfig Setup was successful.')
+    event.returnValue = {
+      data: {
+        activeContext: kubeconfig.currentContext,
+        contexts: kubeconfig.contexts.map(context => context.name)
+      },
+      error: null
+    }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
+      error: 'Could not merge selected Kubeconfig files.'
+    }
+  }
+}
+
 function getContexts(event) {
   try {
     logInfo('Fetching Contexts from Kubeconfig.')
@@ -26,7 +137,7 @@ function getContexts(event) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not fetch Cluster Information from Kubeconfig.'
     }
   }
 }
@@ -87,7 +198,7 @@ async function getNodes(event) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not get Nodes Information of current Cluster.'
     }
   }
 }
@@ -97,7 +208,7 @@ async function getNamespaces(event) {
     logInfo('Fetching Namespaces via Client.')
     const namespaces = await client.api.v1.namespaces.get()
     const filteredNamespaces = namespaces.body.items.reduce((result, namespace) => {
-      if (!disabledNamespaces.includes(namespace.metadata.name)) result.push(namespace)
+      if (!DISABLED_NAMESPACES.includes(namespace.metadata.name)) result.push(namespace)
       return result
     }, [])
 
@@ -114,7 +225,7 @@ async function getNamespaces(event) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not fetch Namespaces for current Cluster.'
     }
   }
 }
@@ -131,7 +242,7 @@ async function getDeploymentsInNamespace(event, namespace) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not get Deployments for current Namespace ' + namespace + '.'
     }
   }
 }
@@ -162,7 +273,7 @@ async function getServicesInNamespace(event, namespace) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not fetch Services for current Namespace ' + namespace + '.'
     }
   }
 }
@@ -193,7 +304,7 @@ async function getPodsInNamespace(event, namespace) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not get Pods for current Namespace ' + namespace + '.'
     }
   }
 }
@@ -222,7 +333,7 @@ async function getLogsForPodInNamespace(event, namespace, pod, limit = '10') {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not get Logs for Pod ' + pod.name + ' in current Namespace ' + namespace + '.'
     }
   }
 }
@@ -253,7 +364,7 @@ function portForwardToService(event, service, targetPort) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: error
+      error: 'Could not start Port Forwarding to Port ' + (port + index) + '.'
     }
   }
 }
@@ -278,27 +389,20 @@ function stopPortForward(event) {
     if (event)
       event.returnValue = {
         data: null,
-        error: error
+        error: 'Port Forwarding could not be stopped successfully.'
       }
   }
 }
 
 // ==============================================================
-;(async () => {
-  try {
-    kubeconfig = new KubeConfig()
-    kubeconfig.loadFromFile(app.getPath('home') + '/.kube/config')
-
-    const backend = new Request({ kubeconfig })
-    client = new Client({ backend, version: '1.13' })
-
-    logInfo('Client has been initialized.')
-  } catch (error) {
-    logError(error)
-  }
-})()
+try {
+  setupKubeconfig()
+} catch (error) {
+  logError(error)
+}
 
 // ==============================================================
+ipcMain.on('kubeconfig', setKubeconfig)
 ipcMain.on('clusters', getContexts)
 ipcMain.on('nodes', getNodes)
 ipcMain.on('namespaces', getNamespaces)

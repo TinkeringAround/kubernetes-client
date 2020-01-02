@@ -24,8 +24,8 @@ export const colors = {
   // Colors
   transparent: 'transparent',
   white: 'white',
-  black: 'rgb(50,50,50)',
-  lightGrey: 'rgba(230,230,230,0.3)',
+  black: 'rgb(55,55,55)',
+  lightGrey: 'rgba(240,240,240)',
   grey: 'rgb(200,200,200)',
   red: '#E63946',
   blue: 'rgba(50, 120, 225, 1)',

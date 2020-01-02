@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback } from 'react'
+import React, { FC, useState, useCallback, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
 import { PoseGroup } from 'react-pose'
@@ -20,15 +20,23 @@ import Layout from './components/layout'
 import Nodes from './components/nodes'
 import Services from './components/services'
 import Pods from './components/pods'
+import Setup from './components/setup'
 import ErrorDialog from './components/dialogs/error'
 
 // Driver
-import { getContexts, getNodes, getNamespaces, getServices, getPods } from './driver/ipc'
+import {
+  mergeKubeconfig,
+  getContexts,
+  getNodes,
+  getNamespaces,
+  getServices,
+  getPods
+} from './driver/ipc'
 
 // ==========================================================
 const App: FC = () => {
   // App Context
-  const [page, setPage] = useState<number>(0)
+  const [page, setPage] = useState<number>(-2)
   const [error, setError] = useState<TError | null>(null)
   // K8s Context
   const [contexts, setContexts] = useState<TContexts | null>(null)
@@ -40,10 +48,22 @@ const App: FC = () => {
   const [pods, setPods] = useState<TPods | null>(null)
 
   // ==========================================================
+  const setKubeconfig = useCallback((files: Array<string>) => {
+    const loadedContexts = mergeKubeconfig(files)
+    if ('activeContext' in loadedContexts) {
+      setContexts(loadedContexts)
+      setPage(0)
+    } else setError(loadedContexts)
+
+    return loadedContexts
+  }, [])
+
   const reloadContexts = useCallback(() => {
     const loadedContexts = getContexts()
-    if ('activeContext' in loadedContexts) setContexts(loadedContexts)
-    else setError(loadedContexts)
+    if ('activeContext' in loadedContexts) {
+      setContexts(loadedContexts)
+      setPage(0)
+    } else setPage(-1)
 
     return loadedContexts
   }, [])
@@ -97,6 +117,14 @@ const App: FC = () => {
   }, [])
 
   // ==========================================================
+  useEffect(() => {
+    if (!contexts) reloadContexts()
+  }, [contexts, reloadContexts])
+
+  const noValidConfig =
+    page === -1 || !contexts || (contexts != null && contexts.contexts.length === 0)
+
+  // ==========================================================
   return (
     <AppContext.Provider
       value={{
@@ -111,6 +139,8 @@ const App: FC = () => {
     >
       <K8sContext.Provider
         value={{
+          setKubeconfig: setKubeconfig,
+
           contexts: contexts,
           reloadContexts: reloadContexts,
 
@@ -134,6 +164,12 @@ const App: FC = () => {
         <Layout>
           {/* Content */}
           <PoseGroup flipMove={false}>
+            {noValidConfig && (
+              <APage key="Setup">
+                <Setup />
+              </APage>
+            )}
+
             {page === 0 && (
               <APage key="Nodes">
                 <Nodes />

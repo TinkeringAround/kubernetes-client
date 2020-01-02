@@ -10,6 +10,6 @@ export const getTimestamp = (timestamp: string | null) => {
   var min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes()
   // var sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds()
 
-  var time = hour + ':' + min + ', ' + date + '. ' + month + ' ' + year
+  var time = `${date}. ${month} ${year}, ${hour}:${min}`
   return time
 }

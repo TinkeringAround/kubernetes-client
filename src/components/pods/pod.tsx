@@ -25,7 +25,7 @@ import { getLogsForPod } from '../../driver/ipc'
 // ==========================================================
 const SPod = styled(Box)`
   width: 100%;
-  height: 50px;
+  height: 3.25rem;
   margin-bottom: 1rem;
 
   background: white;
@@ -64,38 +64,44 @@ const Pod: FC<Props> = ({ pod }) => {
   const [logs, setLogs] = useState<TLog | null>(null)
   const [limit, setLimit] = useState<TLogLimit>('10')
 
-  const loadLogs = useCallback((logLimit: TLogLimit) => {
-    const loadedLogs = getLogsForPod(currentNamespace, pod, logLimit)
-    if ('error' in loadedLogs) setError(loadedLogs)
-    else setLogs(loadedLogs)
-  }, [])
+  const loadLogs = useCallback(
+    (logLimit: TLogLimit) => {
+      const loadedLogs = getLogsForPod(currentNamespace, pod, logLimit)
+      if ('error' in loadedLogs) setError(loadedLogs)
+      else setLogs(loadedLogs)
+    },
+    [currentNamespace, pod, setError]
+  )
 
-  const changeLimit = useCallback((selection: string) => {
-    var newLimit: TLogLimit = limit
-    switch (selection) {
-      case '10':
-        newLimit = '10'
-        break
-      case '25':
-        newLimit = '25'
-        break
-      case '50':
-        newLimit = '50'
-        break
-      case '100':
-        newLimit = '100'
-        break
-      case '250':
-        newLimit = '250'
-        break
-      case '500':
-        newLimit = '500'
-        break
-    }
+  const changeLimit = useCallback(
+    (selection: string) => {
+      var newLimit: TLogLimit = limit
+      switch (selection) {
+        case '10':
+          newLimit = '10'
+          break
+        case '25':
+          newLimit = '25'
+          break
+        case '50':
+          newLimit = '50'
+          break
+        case '100':
+          newLimit = '100'
+          break
+        case '250':
+          newLimit = '250'
+          break
+        case '500':
+          newLimit = '500'
+          break
+      }
 
-    setLimit(newLimit)
-    loadLogs(newLimit)
-  }, [])
+      setLimit(newLimit)
+      loadLogs(newLimit)
+    },
+    [limit, loadLogs]
+  )
 
   const formatImageName = useCallback((imageName: string) => {
     var split = imageName.split(':')[0].split('/')

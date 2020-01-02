@@ -27,7 +27,7 @@ const ErrorDialog: FC<Props> = ({ error, close }) => (
         <AErrorDialog key="ErrorDialog">
           <Box>
             <Heading level="1" size="1.5rem" color={colors['grey']} margin="0">
-              Error
+              {error.message}
             </Heading>
             <Text
               size="0.9rem"
@@ -36,7 +36,7 @@ const ErrorDialog: FC<Props> = ({ error, close }) => (
               wordBreak="break-all"
               style={{ maxHeight: 'calc(130px - 3.5rem)', overflow: 'hidden auto' }}
             >
-              {error.message}
+              {error.error}
             </Text>
           </Box>
           {/* Buttons */}

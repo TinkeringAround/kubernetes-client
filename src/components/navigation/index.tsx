@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react'
+import React, { FC, useContext, Fragment } from 'react'
 import { Box } from 'grommet'
 
 // Styles
@@ -21,14 +21,23 @@ const Navigation: FC = () => {
     <Box width={sizes['navigation'] + 'px'} height="100%" background="white">
       <Box pad={{ top: '1rem' }} align="center">
         <Logo />
-        <Icon
-          type="server"
-          selected={page === 0}
-          margin="5rem 0 .75rem"
-          onClick={() => setPage(0)}
-        />
-        <Icon type="service" selected={page === 1} margin="0 0 .75rem" onClick={() => setPage(1)} />
-        <Icon type="pod" selected={page === 2} onClick={() => setPage(2)} />
+        {page >= 0 && (
+          <Fragment>
+            <Icon
+              type="server"
+              selected={page === 0}
+              margin="5rem 0 .75rem"
+              onClick={() => setPage(0)}
+            />
+            <Icon
+              type="service"
+              selected={page === 1}
+              margin="0 0 .75rem"
+              onClick={() => setPage(1)}
+            />
+            <Icon type="pod" selected={page === 2} onClick={() => setPage(2)} />
+          </Fragment>
+        )}
       </Box>
     </Box>
   )

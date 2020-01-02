@@ -1,3 +1,7 @@
+html {
+  font-size: 16px;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
@@ -8,4 +12,17 @@ body {
   overflow: hidden;
 
   color: rgb(50, 50, 50);
+}
+
+/* Breakpoints */
+@media (min-width: 1200px) {
+  html {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 1500px) {
+  html {
+    font-size: 22px;
+  }
 }

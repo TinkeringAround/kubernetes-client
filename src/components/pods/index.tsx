@@ -16,11 +16,11 @@ import Pod from './pod'
 // ==========================================================
 const Pods: FC = () => {
   const { page } = useContext(AppContext)
-  const { currentNamespace, reloadPods, pods } = useContext(K8sContext)
+  const { contexts, currentNamespace, reloadPods, pods } = useContext(K8sContext)
 
   useEffect(() => {
-    if (page === 2 && currentNamespace) reloadPods(currentNamespace)
-  }, [page, currentNamespace, reloadPods])
+    if (page === 2 && contexts && currentNamespace) reloadPods(currentNamespace)
+  }, [page, contexts, currentNamespace, reloadPods])
 
   return (
     <Box pad="1rem 2rem" width="inherit" height="inherit" justify="between">

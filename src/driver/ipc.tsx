@@ -17,6 +17,23 @@ import {
 const { ipcRenderer } = window.electron
 
 // ==========================================================
+export const mergeKubeconfig: (configFiles: Array<string>) => TContexts | TError = (
+  configFiles: Array<string>
+) => {
+  const response: TResponse = ipcRenderer.sendSync('kubeconfig', configFiles)
+  console.info('Contexts: ', response.data)
+
+  if (response.data) return response.data as TContexts
+  else {
+    console.error(response.error)
+    return {
+      message: 'Unexpected Error',
+      error: response.error ? response.error : 'Unkown Error.'
+    }
+  }
+}
+
+// ==========================================================
 export const getContexts: () => TContexts | TError = () => {
   const response: TResponse = ipcRenderer.sendSync('clusters')
   console.info('Contexts: ', response.data)
@@ -25,7 +42,7 @@ export const getContexts: () => TContexts | TError = () => {
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }
@@ -40,7 +57,7 @@ export const getNodes: () => TNodes | TError = () => {
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }
@@ -55,7 +72,7 @@ export const getNamespaces: () => TNamespaces | TError = () => {
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }
@@ -72,7 +89,7 @@ export const getServices: (namespace: string | null) => TServices | TError = (
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }
@@ -87,7 +104,7 @@ export const getPods: (namespace: string | null) => TPods | TError = (namespace:
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }
@@ -106,7 +123,7 @@ export const getLogsForPod: (
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }
@@ -124,7 +141,7 @@ export const startPortForwardToService: (service: TService, targetPort: number) 
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }
@@ -138,7 +155,7 @@ export const stopPortForward: () => true | TError = () => {
   else {
     console.error(response.error)
     return {
-      message: 'An unexpected error occured.',
+      message: 'Unexpected Error',
       error: response.error ? response.error : 'Unkown Error.'
     }
   }

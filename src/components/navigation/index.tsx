@@ -12,13 +12,20 @@ import Icon from '../../atoms/icons'
 
 // Components
 import Logo from '../logo'
+import AppVersion from '../appVersion'
 
 // ==========================================================
 const Navigation: FC = () => {
   const { page, setPage } = useContext(AppContext)
 
   return (
-    <Box width={sizes['navigation'] + 'px'} height="100%" background="white">
+    <Box
+      width={sizes['navigation'] + 'px'}
+      height="100%"
+      background="white"
+      style={{ position: 'relative' }}
+      align="center"
+    >
       <Box pad={{ top: '1rem' }} align="center">
         <Logo />
         {page >= 0 && (
@@ -39,6 +46,8 @@ const Navigation: FC = () => {
           </Fragment>
         )}
       </Box>
+
+      <AppVersion />
     </Box>
   )
 }

@@ -1,4 +1,5 @@
-console.info('===> Initializing...')
+const { ipcMain } = require('electron')
+
 // ==============================================================
 function logError(error) {
   const message = getTimestamp() + '   ERROR    ' + error
@@ -11,6 +12,7 @@ function logInfo(info) {
   console.info(message)
 }
 
+// ==============================================================
 function getTimestamp() {
   var a = new Date(Date.now())
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -25,6 +27,18 @@ function getTimestamp() {
 
   var time = hour + ':' + min + ':' + sec + ', ' + date + '. ' + month + ' ' + year
   return time
+}
+// ==============================================================
+try {
+  console.info(`===> Running K8s-Client Version ${process.env.npm_package_version}`)
+  ipcMain.on('version', event => {
+    event.returnValue = {
+      data: process.env.npm_package_version,
+      error: null
+    }
+  })
+} catch (error) {
+  logError(error)
 }
 
 // ==============================================================

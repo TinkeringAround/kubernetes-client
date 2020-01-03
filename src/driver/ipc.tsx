@@ -17,6 +17,21 @@ import {
 const { ipcRenderer } = window.electron
 
 // ==========================================================
+export const getAppVersion: () => string | TError = () => {
+  const response: TResponse = ipcRenderer.sendSync('version')
+  console.info('Contexts: ', response.data)
+
+  if (response.data) return response.data as string
+  else {
+    console.error(response.error)
+    return {
+      message: 'Unexpected Error',
+      error: response.error ? response.error : 'Unkown Error.'
+    }
+  }
+}
+
+// ==========================================================
 export const mergeKubeconfig: (configFiles: Array<string>) => TContexts | TError = (
   configFiles: Array<string>
 ) => {

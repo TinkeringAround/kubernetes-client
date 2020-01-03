@@ -49,52 +49,54 @@ function setKubeconfig(event, configFiles) {
     }
 
     // Load Config
-    configFiles.forEach(config => {
-      try {
-        const loadedConfig = yaml.parse(fs.readFileSync(path.resolve(config), 'utf-8'))
-        if (loadedConfig) {
-          newConfig.clusters = [
-            ...newConfig.clusters.map(clstr => {
-              return {
-                name: clstr.name,
-                cluster: {
-                  'certificate-authority-data': clstr.caData,
-                  server: clstr.server
+    if (configFiles && configFiles.length > 0) {
+      configFiles.forEach(config => {
+        try {
+          const loadedConfig = yaml.parse(fs.readFileSync(path.resolve(config), 'utf-8'))
+          if (loadedConfig) {
+            newConfig.clusters = [
+              ...newConfig.clusters.map(clstr => {
+                return {
+                  cluster: {
+                    'certificate-authority-data': clstr.caData,
+                    server: clstr.server
+                  },
+                  name: clstr.name
                 }
-              }
-            }),
-            ...loadedConfig.clusters
-          ]
-          newConfig.contexts = [
-            ...newConfig.contexts.map(ctx => {
-              return {
-                name: ctx.name,
-                context: {
-                  cluster: ctx.cluster,
-                  namespace: ctx.namespace,
-                  user: ctx.user
+              }),
+              ...loadedConfig.clusters
+            ]
+            newConfig.contexts = [
+              ...newConfig.contexts.map(ctx => {
+                return {
+                  context: {
+                    cluster: ctx.cluster,
+                    namespace: ctx.namespace,
+                    user: ctx.user
+                  },
+                  name: ctx.name
                 }
-              }
-            }),
-            ...loadedConfig.contexts
-          ]
-          newConfig.users = [
-            ...newConfig.users.map(usr => {
-              return {
-                name: usr.name,
-                user: {
-                  'client-certificate-data': usr.certData,
-                  'client-key-data': usr.keyData
+              }),
+              ...loadedConfig.contexts
+            ]
+            newConfig.users = [
+              ...newConfig.users.map(usr => {
+                return {
+                  user: {
+                    'client-certificate-data': usr.certData,
+                    'client-key-data': usr.keyData
+                  },
+                  name: usr.name
                 }
-              }
-            }),
-            ...loadedConfig.users
-          ]
+              }),
+              ...loadedConfig.users
+            ]
+          }
+        } catch (e) {
+          logError('Could not open File.')
         }
-      } catch (e) {
-        logError('Could not open File.')
-      }
-    })
+      })
+    }
 
     // Set Current Index when not set
     if (newConfig['current-context'] == '' && newConfig.contexts.length > 0)
@@ -106,7 +108,7 @@ function setKubeconfig(event, configFiles) {
 
     // Reload Kubeconfig
     setupKubeconfig()
-    logInfo('Kubeconfig Setup was successful.')
+    logInfo('Updating Kubeconfig was successful.')
     event.returnValue = {
       data: {
         activeContext: kubeconfig.currentContext,
@@ -118,7 +120,7 @@ function setKubeconfig(event, configFiles) {
     logError(error)
     event.returnValue = {
       data: null,
-      error: 'Could not merge selected Kubeconfig files.'
+      error: 'Could not Update Kubeconfig.'
     }
   }
 }
@@ -138,6 +140,26 @@ function getContexts(event) {
     event.returnValue = {
       data: null,
       error: 'Could not fetch Cluster Information from Kubeconfig.'
+    }
+  }
+}
+
+function setContext(event, context) {
+  try {
+    kubeconfig.setCurrentContext(context)
+    logInfo(`Context changed to ${context}.`)
+    event.returnValue = {
+      data: {
+        activeContext: kubeconfig.currentContext,
+        contexts: kubeconfig.contexts.map(context => context.name)
+      },
+      error: null
+    }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
+      error: 'Could not change context in Kubeconfig.'
     }
   }
 }
@@ -404,6 +426,7 @@ try {
 // ==============================================================
 ipcMain.on('kubeconfig', setKubeconfig)
 ipcMain.on('clusters', getContexts)
+ipcMain.on('activeCluster', setContext)
 ipcMain.on('nodes', getNodes)
 ipcMain.on('namespaces', getNamespaces)
 ipcMain.on('deployments', getDeploymentsInNamespace)

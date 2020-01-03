@@ -25,6 +25,7 @@ type K8sContextProps = {
   setKubeconfig: (files: Array<string>) => TContexts | TError
 
   contexts: TContexts | null
+  setContext: (context: string) => TContexts | TError
   reloadContexts: () => TContexts | TError
 
   nodes: TNodes | null
@@ -55,6 +56,12 @@ export const K8sContext = React.createContext<K8sContextProps>({
 
   // Context
   contexts: null,
+  setContext: (context: string) => {
+    return {
+      message: '',
+      error: ''
+    }
+  },
   reloadContexts: () => {
     return {
       message: '',

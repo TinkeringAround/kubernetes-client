@@ -1,3 +1,4 @@
+console.info('===> Initializing...')
 // ==============================================================
 function logError(error) {
   const message = getTimestamp() + '   ERROR    ' + error

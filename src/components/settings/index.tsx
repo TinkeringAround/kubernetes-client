@@ -22,11 +22,17 @@ const SSettings = styled(Box)`
 // ==========================================================
 const Settings: FC = () => {
   const { page } = useContext(AppContext)
-  const { contexts, namespaces, currentNamespace, setNamespace, reloadNamespaces } = useContext(
-    K8sContext
-  )
+  const {
+    contexts,
+    setContext,
+    namespaces,
+    currentNamespace,
+    setNamespace,
+    reloadNamespaces
+  } = useContext(K8sContext)
   const [namespaceNames, setNamespaceNames] = useState<Array<string>>([])
 
+  // ==========================================================
   useEffect(() => {
     if (page > 0 && namespaces && namespaces.length > 0)
       setNamespaceNames(namespaces.map((ns: TNamespace) => ns.name))
@@ -39,6 +45,7 @@ const Settings: FC = () => {
   const multipleNamespaces = namespaces && namespaces.length > 0 ? true : false
   const multipleCluster = contexts && contexts.contexts.length > 1 ? true : false
 
+  // ==========================================================
   return (
     <Fragment>
       {contexts && (
@@ -59,9 +66,7 @@ const Settings: FC = () => {
               width="150px"
               options={contexts.contexts}
               value={contexts.activeContext}
-              select={(selection: string) => {
-                console.log(selection)
-              }}
+              select={setContext}
               disabled={!multipleCluster}
             />
           )}

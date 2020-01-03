@@ -27,6 +27,7 @@ import ErrorDialog from './components/dialogs/error'
 import {
   mergeKubeconfig,
   getContexts,
+  setActiveContext,
   getNodes,
   getNamespaces,
   getServices,
@@ -52,6 +53,17 @@ const App: FC = () => {
     const loadedContexts = mergeKubeconfig(files)
     if ('activeContext' in loadedContexts) {
       setContexts(loadedContexts)
+      setPage(0)
+    } else setError(loadedContexts)
+
+    return loadedContexts
+  }, [])
+
+  const setContext = useCallback((context: string) => {
+    const loadedContexts = setActiveContext(context)
+    if ('activeContext' in loadedContexts) {
+      setContexts(loadedContexts)
+      setCurrentNamespace('default')
       setPage(0)
     } else setError(loadedContexts)
 
@@ -142,6 +154,7 @@ const App: FC = () => {
           setKubeconfig: setKubeconfig,
 
           contexts: contexts,
+          setContext: setContext,
           reloadContexts: reloadContexts,
 
           nodes: nodes,

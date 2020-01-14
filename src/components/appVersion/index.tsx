@@ -1,12 +1,14 @@
 import React, { useState, useEffect, FC, useContext } from 'react'
 import { Text } from 'grommet'
 
+// Styles
+import { colors } from '../../styles'
+
 // Context
 import { AppContext } from '../../context'
 
 // Driver
 import { getAppVersion } from '../../driver/ipc'
-import { colors } from '../../styles'
 
 // ==========================================================
 const AppVersion: FC = () => {
@@ -21,12 +23,12 @@ const AppVersion: FC = () => {
       if (typeof loadedVersion === 'string') setVersion(loadedVersion)
       else setError(loadedVersion)
     }
-  }, [setError])
+  }, [version, setError])
 
   // ==========================================================
   return (
     <Text size=".6rem" color={colors['black']} style={{ position: 'absolute', bottom: '1rem' }}>
-      {`❤️v${version}`}
+      {`v${version}`}
     </Text>
   )
 }

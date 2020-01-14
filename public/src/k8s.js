@@ -2,10 +2,13 @@ const { ipcMain } = require('electron')
 const { KubeConfig, Client } = require('kubernetes-client')
 const Request = require('kubernetes-client/backends/request')
 var cmd = require('node-cmd')
+const fs = require('fs')
+const yaml = require('yaml')
+const path = require('path')
 
 // Packages
 const { logError, logInfo } = require('./logger')
-const { CONFIG, DISABLED_NAMESPACES } = require('./consts')
+const { CONFIG, DISABLED_NAMESPACES, DEFAULT_CONFIG } = require('./consts')
 
 // ==============================================================
 let client, backend, kubeconfig
@@ -13,40 +16,85 @@ let childProcesses = []
 
 // ==============================================================
 function setupKubeconfig() {
-  kubeconfig = new KubeConfig()
-  kubeconfig.loadFromFile(CONFIG)
+  try {
+    kubeconfig = new KubeConfig()
+    kubeconfig.loadFromFile(CONFIG)
 
-  backend = new Request({ kubeconfig })
-  client = new Client({ backend, version: '1.13' })
+    backend = new Request({ kubeconfig })
+    client = new Client({ backend, version: '1.13' })
 
-  logInfo('Client setup was successful.')
+    logInfo('Client setup was successful.')
+  } catch (error) {
+    logError(error)
+  }
+}
+
+function resetKubeconfig() {
+  try {
+    writeKubeconfigToDisk(DEFAULT_CONFIG)
+
+    // Reload new Kubeconfig
+    setupKubeconfig()
+  } catch (error) {
+    logError(error)
+  }
+}
+
+function writeKubeconfigToDisk(config) {
+  try {
+    if (fs.existsSync(CONFIG)) fs.unlinkSync(CONFIG)
+    fs.appendFileSync(CONFIG, yaml.stringify(config))
+  } catch (error) {
+    logError(error)
+  }
+}
+
+function transferKubeconfigTo(config) {
+  var newConfig = config
+
+  if (kubeconfig && kubeconfig.hasOwnProperty('clusters') && kubeconfig.clusters.length > 0) {
+    newConfig.contexts = kubeconfig.contexts.map(ctx => {
+      return {
+        context: {
+          cluster: ctx.cluster,
+          namespace: ctx.namespace,
+          user: ctx.user
+        },
+        name: ctx.name
+      }
+    })
+
+    newConfig.clusters = kubeconfig.clusters.map(c => {
+      return {
+        cluster: {
+          'certificate-authority-data': c.caData,
+          server: c.server
+        },
+        name: c.name
+      }
+    })
+
+    newConfig.users = kubeconfig.users.map(u => {
+      return {
+        user: {
+          'client-certificate-data': u.certData,
+          'client-key-data': u.keyData
+        },
+        name: u.name
+      }
+    })
+
+    newConfig['current-context'] = kubeconfig.currentContext
+  }
+
+  return newConfig
 }
 
 // ==============================================================
 function setKubeconfig(event, configFiles) {
   try {
-    const fs = require('fs')
-    const yaml = require('yaml')
-    const path = require('path')
-
-    // New Config
-    var newConfig = {
-      apiVersion: 'v1',
-      clusters: [],
-      contexts: [],
-      'current-context': '',
-      kind: 'Config',
-      preferences: {},
-      users: []
-    }
-
     // Transfer old Values
-    if (kubeconfig.hasOwnProperty('clusters')) {
-      newConfig.clusters = kubeconfig.clusters
-      newConfig.contexts = kubeconfig.contexts
-      newConfig['current-context'] = kubeconfig.currentContext
-      newConfig.users = kubeconfig.users
-    }
+    var newConfig = transferKubeconfigTo(DEFAULT_CONFIG)
 
     // Load Config
     if (configFiles && configFiles.length > 0) {
@@ -54,43 +102,9 @@ function setKubeconfig(event, configFiles) {
         try {
           const loadedConfig = yaml.parse(fs.readFileSync(path.resolve(config), 'utf-8'))
           if (loadedConfig) {
-            newConfig.clusters = [
-              ...newConfig.clusters.map(clstr => {
-                return {
-                  cluster: {
-                    'certificate-authority-data': clstr.caData,
-                    server: clstr.server
-                  },
-                  name: clstr.name
-                }
-              }),
-              ...loadedConfig.clusters
-            ]
-            newConfig.contexts = [
-              ...newConfig.contexts.map(ctx => {
-                return {
-                  context: {
-                    cluster: ctx.cluster,
-                    namespace: ctx.namespace,
-                    user: ctx.user
-                  },
-                  name: ctx.name
-                }
-              }),
-              ...loadedConfig.contexts
-            ]
-            newConfig.users = [
-              ...newConfig.users.map(usr => {
-                return {
-                  user: {
-                    'client-certificate-data': usr.certData,
-                    'client-key-data': usr.keyData
-                  },
-                  name: usr.name
-                }
-              }),
-              ...loadedConfig.users
-            ]
+            newConfig.clusters = [...newConfig.clusters, ...loadedConfig.clusters]
+            newConfig.contexts = [...newConfig.contexts, ...loadedConfig.contexts]
+            newConfig.users = [...newConfig.users, ...loadedConfig.users]
           }
         } catch (e) {
           logError('Could not open File.')
@@ -103,8 +117,7 @@ function setKubeconfig(event, configFiles) {
       newConfig['current-context'] = newConfig.contexts[0].name
 
     // Save new Document
-    if (fs.existsSync(CONFIG)) fs.unlinkSync(CONFIG)
-    fs.appendFileSync(CONFIG, yaml.stringify(newConfig))
+    writeKubeconfigToDisk(newConfig)
 
     // Reload Kubeconfig
     setupKubeconfig()
@@ -160,6 +173,44 @@ function setContext(event, context) {
     event.returnValue = {
       data: null,
       error: 'Could not change context in Kubeconfig.'
+    }
+  }
+}
+
+function deleteContext(event, context) {
+  try {
+    if (kubeconfig.clusters.length <= 1) {
+      resetKubeconfig()
+      setupKubeconfig()
+    } else {
+      const deletedContext = kubeconfig.contexts.find(c => c.name === context)
+      const deletedCluster = kubeconfig.clusters.find(c => c.name === deletedContext.cluster)
+      const deletedUser = kubeconfig.users.find(u => u.name === deletedContext.user)
+
+      if (deletedContext && deletedCluster && deletedUser) {
+        kubeconfig.contexts = kubeconfig.contexts.filter(c => c.name !== context)
+        kubeconfig.clusters = kubeconfig.clusters.filter(c => c.name !== deletedCluster.name)
+        kubeconfig.users = kubeconfig.users.filter(u => u.name !== deletedUser.name)
+      }
+
+      if (kubeconfig.currentContext === context)
+        kubeconfig.setCurrentContext(kubeconfig.contexts[0].name)
+
+      var newConfig = transferKubeconfigTo(DEFAULT_CONFIG)
+      writeKubeconfigToDisk(newConfig)
+      setupKubeconfig()
+    }
+
+    if (context)
+      event.returnValue = {
+        data: true,
+        error: null
+      }
+  } catch (error) {
+    logError(error)
+    event.returnValue = {
+      data: null,
+      error: `Could not delete context ${context}.`
     }
   }
 }
@@ -427,6 +478,7 @@ try {
 ipcMain.on('kubeconfig', setKubeconfig)
 ipcMain.on('clusters', getContexts)
 ipcMain.on('activeCluster', setContext)
+ipcMain.on('deleteCluster', deleteContext)
 ipcMain.on('nodes', getNodes)
 ipcMain.on('namespaces', getNamespaces)
 ipcMain.on('deployments', getDeploymentsInNamespace)

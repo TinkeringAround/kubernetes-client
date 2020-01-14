@@ -77,6 +77,20 @@ export const setActiveContext: (context: string) => TContexts | TError = (contex
   }
 }
 
+export const deleteContext: (context: string) => boolean | TError = (context: string) => {
+  const response: TResponse = ipcRenderer.sendSync('deleteCluster', context)
+  console.info('Success: ', response.data)
+
+  if (typeof response.data === 'boolean') return response.data as boolean
+  else {
+    console.error(response.error)
+    return {
+      message: 'Unexpected Error',
+      error: response.error ? response.error : 'Unkown Error.'
+    }
+  }
+}
+
 // ==========================================================
 export const getNodes: () => TNodes | TError = () => {
   const response: TResponse = ipcRenderer.sendSync('nodes')

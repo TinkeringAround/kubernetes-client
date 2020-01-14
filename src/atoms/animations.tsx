@@ -46,7 +46,7 @@ export const SBackground = styled.div`
   z-index: 50;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.75);
 `
 
 export const ABackground = posed(SBackground)({
@@ -123,4 +123,26 @@ const SDropzoneDialog = styled(Box)`
 export const ADropzoneDialog = posed(SDropzoneDialog)({
   exit: { opacity: 0, transition: { duration: SHORT } },
   enter: { opacity: 1, transition: { duration: SHORT } }
+})
+
+// ===================================================================
+const SSideNav = styled(Box)`
+  position: fixed;
+  right: 0;
+  top: 0;
+
+  z-index: 75;
+
+  width: 250px;
+  height: 100vh;
+
+  padding: 2rem 1rem;
+  background: ${colors['white']};
+
+  cursor: default;
+`
+
+export const ASideNav = posed(SSideNav)({
+  exit: { opacity: 0, right: -200, transition: { duration: SHORT } },
+  enter: { opacity: 1, right: 0, transition: { duration: SHORT } }
 })

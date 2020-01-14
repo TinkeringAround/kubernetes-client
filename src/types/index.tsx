@@ -14,7 +14,17 @@ declare global {
 
 // ==========================================================
 export type TResponse = {
-  data: TContexts | TNodes | TNamespaces | TServices | TSuccess | TPods | TLog | string | null
+  data:
+    | TContexts
+    | TNodes
+    | TNamespaces
+    | TServices
+    | TSuccess
+    | TPods
+    | TLog
+    | string
+    | boolean
+    | null
   error: string | null
 }
 

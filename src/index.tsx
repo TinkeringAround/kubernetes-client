@@ -10,7 +10,7 @@ import { TContexts, TError, TNodes, TNamespaces, TServices, TService, TPods } fr
 import './styles/global.css'
 
 // Context
-import { AppContext, K8sContext } from './context'
+import { AppContext, K8sContext, SettingsContext } from './context'
 
 // Atoms
 import { APage } from './atoms/animations'
@@ -20,6 +20,7 @@ import Layout from './components/layout'
 import Nodes from './components/nodes'
 import Services from './components/services'
 import Pods from './components/pods'
+import Settings from './components/settings'
 import Setup from './components/setup'
 import ErrorDialog from './components/dialogs/error'
 
@@ -28,10 +29,12 @@ import {
   mergeKubeconfig,
   getContexts,
   setActiveContext,
+  deleteContext,
   getNodes,
   getNamespaces,
   getServices,
-  getPods
+  getPods,
+  stopPortForward
 } from './driver/ipc'
 
 // ==========================================================
@@ -47,23 +50,14 @@ const App: FC = () => {
   const [currentService, setCurrentService] = useState<TService | null>(null)
   const [services, setServices] = useState<TServices | null>(null)
   const [pods, setPods] = useState<TPods | null>(null)
+  // Settings Context
+  const [port, setPort] = useState<number>(35000)
 
   // ==========================================================
   const setKubeconfig = useCallback((files: Array<string>) => {
     const loadedContexts = mergeKubeconfig(files)
     if ('activeContext' in loadedContexts) {
       setContexts(loadedContexts)
-      setPage(0)
-    } else setError(loadedContexts)
-
-    return loadedContexts
-  }, [])
-
-  const setContext = useCallback((context: string) => {
-    const loadedContexts = setActiveContext(context)
-    if ('activeContext' in loadedContexts) {
-      setContexts(loadedContexts)
-      setCurrentNamespace('default')
       setPage(0)
     } else setError(loadedContexts)
 
@@ -79,6 +73,30 @@ const App: FC = () => {
 
     return loadedContexts
   }, [])
+
+  const setContext = useCallback((context: string) => {
+    const loadedContexts = setActiveContext(context)
+    if ('activeContext' in loadedContexts) {
+      setContexts(loadedContexts)
+      setCurrentNamespace('default')
+      setPage(0)
+    } else setError(loadedContexts)
+
+    return loadedContexts
+  }, [])
+
+  const deleteCluster = useCallback(
+    (context: string) => {
+      const deletedContext = deleteContext(context)
+      if (typeof deletedContext === 'boolean') {
+        reloadContexts()
+        setCurrentNamespace('default')
+      } else setError(deletedContext)
+
+      return deletedContext
+    },
+    [reloadContexts]
+  )
 
   const reloadNodes = useCallback(() => {
     const loadedNodes = getNodes()
@@ -133,6 +151,13 @@ const App: FC = () => {
     if (!contexts) reloadContexts()
   }, [contexts, reloadContexts])
 
+  useEffect(() => {
+    if (currentService) {
+      setCurrentService(null)
+      stopPortForward()
+    }
+  }, [port])
+
   const noValidConfig =
     page === -1 || !contexts || (contexts != null && contexts.contexts.length === 0)
 
@@ -155,6 +180,7 @@ const App: FC = () => {
 
           contexts: contexts,
           setContext: setContext,
+          deleteContext: deleteCluster,
           reloadContexts: reloadContexts,
 
           nodes: nodes,
@@ -174,35 +200,47 @@ const App: FC = () => {
           reloadPods: reloadPods
         }}
       >
-        <Layout>
-          {/* Content */}
-          <PoseGroup flipMove={false}>
-            {noValidConfig && (
-              <APage key="Setup">
-                <Setup />
-              </APage>
-            )}
+        <SettingsContext.Provider
+          value={{
+            port: port,
+            setPort: setPort
+          }}
+        >
+          <Layout>
+            {/* Content */}
+            <PoseGroup flipMove={false}>
+              {noValidConfig && (
+                <APage key="Setup">
+                  <Setup />
+                </APage>
+              )}
 
-            {page === 0 && (
-              <APage key="Nodes">
-                <Nodes />
-              </APage>
-            )}
-            {page === 1 && (
-              <APage key="Services">
-                <Services />
-              </APage>
-            )}
-            {page === 2 && (
-              <APage key="Pods">
-                <Pods />
-              </APage>
-            )}
-          </PoseGroup>
+              {page === 0 && (
+                <APage key="Nodes">
+                  <Nodes />
+                </APage>
+              )}
+              {page === 1 && (
+                <APage key="Services">
+                  <Services />
+                </APage>
+              )}
+              {page === 2 && (
+                <APage key="Pods">
+                  <Pods />
+                </APage>
+              )}
+              {page === 3 && (
+                <APage key="Settings">
+                  <Settings />
+                </APage>
+              )}
+            </PoseGroup>
 
-          {/* Dialogs */}
-          <ErrorDialog error={error} close={() => setError(null)} />
-        </Layout>
+            {/* Dialogs */}
+            <ErrorDialog error={error} close={() => setError(null)} />
+          </Layout>
+        </SettingsContext.Provider>
       </K8sContext.Provider>
     </AppContext.Provider>
   )

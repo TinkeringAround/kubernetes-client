@@ -5,7 +5,7 @@ import { Box, Heading, Text } from 'grommet'
 import { colors, sizes } from '../../styles'
 
 // Context
-import { K8sContext, AppContext } from '../../context'
+import { K8sContext, AppContext, SettingsContext } from '../../context'
 
 // Types
 import { TService } from '../../types'
@@ -27,11 +27,12 @@ const Services: FC = () => {
     reloadServices,
     currentNamespace
   } = useContext(K8sContext)
+  const { port } = useContext(SettingsContext)
 
   const toggleService = useCallback(
     (service: TService) => {
       if (currentService?.name === service.name) stopPortForward()
-      else startPortForwardToService(service, 35000)
+      else startPortForwardToService(service, port)
 
       setService(currentService?.name === service.name ? null : service)
     },

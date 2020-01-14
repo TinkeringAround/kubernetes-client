@@ -14,6 +14,8 @@ interface Props {
   color?: TColor
   fontSize?: string
 
+  justify?: 'center' | 'start'
+
   disabled?: boolean
   onClick?: () => void
 }
@@ -30,6 +32,8 @@ const Button: FC<Props> = ({
   color = 'white',
   fontSize = '.75rem',
 
+  justify = 'center',
+
   disabled = false,
   onClick = null
 }) => (
@@ -43,15 +47,16 @@ const Button: FC<Props> = ({
 
       fontSize: fontSize,
       fontWeight: 'bold',
-      color: disabled ? colors['grey'] : colors[color],
+      color: disabled ? colors['lightGrey'] : colors[color],
 
-      background: disabled ? colors['lightGrey'] : colors[background],
+      background: disabled ? colors['grey'] : colors[background],
       borderRadius: 5,
       border: 'none',
 
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: justify,
 
       outline: 'none',
       transition: 'all 0.25s ease',

@@ -10,7 +10,7 @@ import { K8sContext } from '../../context'
 
 // Components
 import Navigation from '../navigation/'
-import Settings from '../settings'
+import TopNavigation from '../topNavigation'
 
 // Partials
 import DropzoneDialog from './dropzone'
@@ -38,14 +38,15 @@ const Layout: FC = ({ children }) => {
       style={{ position: 'relative', cursor: 'auto' }}
       {...getRootProps()}
     >
-      <Settings />
+      <TopNavigation />
 
       <Navigation />
       <Box
         id="layout-content"
         height="100vh"
-        width={`calc(100vw - ${sizes['navigation']}px)`}
+        width={`calc(100vw - ${sizes['navigation']})`}
         background={colors['lightGrey']}
+        style={{ cursor: 'default' }}
       >
         {children}
       </Box>

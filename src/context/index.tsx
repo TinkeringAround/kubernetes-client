@@ -21,11 +21,23 @@ export const AppContext = React.createContext<AppContextProps>({
 })
 
 // ==========================================================
+type SettingsContextProps = {
+  port: number
+  setPort: (port: number) => void
+}
+
+export const SettingsContext = React.createContext<SettingsContextProps>({
+  port: 35000,
+  setPort: (port: number) => {}
+})
+
+// ==========================================================
 type K8sContextProps = {
   setKubeconfig: (files: Array<string>) => TContexts | TError
 
   contexts: TContexts | null
   setContext: (context: string) => TContexts | TError
+  deleteContext: (context: string) => boolean | TError
   reloadContexts: () => TContexts | TError
 
   nodes: TNodes | null
@@ -57,6 +69,12 @@ export const K8sContext = React.createContext<K8sContextProps>({
   // Context
   contexts: null,
   setContext: (context: string) => {
+    return {
+      message: '',
+      error: ''
+    }
+  },
+  deleteContext: (context: string) => {
     return {
       message: '',
       error: ''

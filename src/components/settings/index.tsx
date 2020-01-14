@@ -1,78 +1,67 @@
-import React, { FC, useContext, useEffect, useState, Fragment } from 'react'
-import { Box } from 'grommet'
-import styled from 'styled-components'
+import React, { FC, useContext } from 'react'
+import { Box, Heading, Text } from 'grommet'
 
 // Context
-import { K8sContext, AppContext } from '../../context'
+import { SettingsContext } from '../../context'
 
-// Types
-import { TNamespace } from '../../types'
+// Styles
+import { colors } from '../../styles'
 
-// Atoms
-import Dropdown from '../../atoms/dropdown'
-
-// ==========================================================
-const SSettings = styled(Box)`
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
-`
+// Components
+import Input from '../../atoms/input'
 
 // ==========================================================
 const Settings: FC = () => {
-  const { page } = useContext(AppContext)
-  const {
-    contexts,
-    setContext,
-    namespaces,
-    currentNamespace,
-    setNamespace,
-    reloadNamespaces
-  } = useContext(K8sContext)
-  const [namespaceNames, setNamespaceNames] = useState<Array<string>>([])
-
-  // ==========================================================
-  useEffect(() => {
-    if (page > 0 && namespaces && namespaces.length > 0)
-      setNamespaceNames(namespaces.map((ns: TNamespace) => ns.name))
-  }, [page, namespaces])
-
-  useEffect(() => {
-    if (!namespaces && contexts) reloadNamespaces()
-  }, [namespaces, contexts, reloadNamespaces])
-
-  const multipleNamespaces = namespaces && namespaces.length > 0 ? true : false
-  const multipleCluster = contexts && contexts.contexts.length > 1 ? true : false
+  const { port, setPort } = useContext(SettingsContext)
 
   // ==========================================================
   return (
-    <Fragment>
-      {contexts && (
-        <SSettings direction="row">
-          {page > 0 && namespaces && (
-            <Dropdown
-              margin="1rem 0 0"
-              width="100px"
-              disabled={!multipleNamespaces}
-              options={namespaceNames}
-              value={currentNamespace ? currentNamespace : ''}
-              select={setNamespace}
+    <Box
+      pad="1rem 2rem"
+      width="inherit"
+      height="inherit"
+      justify="between"
+      style={{ position: 'relative' }}
+    >
+      <Heading level="1" size="3rem" color={colors['blue']} margin="0">
+        Settings
+      </Heading>
+
+      <Box height="85%" width="100%">
+        <Box
+          pad="1rem"
+          direction="row"
+          background="white"
+          justify="between"
+          align="center"
+          style={{ borderRadius: 10 }}
+        >
+          <Box>
+            <Heading level="2" size="1.25rem" color={colors['black']} margin="0">
+              Port Mapping
+            </Heading>
+            <Text size="0.75rem" color={colors['black']}>
+              <i>Changing Port stops all active Port Forwards</i>
+            </Text>
+          </Box>
+          <Box width="150px" margin={{ right: '1.5rem' }}>
+            <Input
+              type="number"
+              value={port + ''}
+              setValue={(value: string) => {
+                try {
+                  const newPort = parseInt(value)
+                  setPort(newPort)
+                } catch (error) {
+                  console.log(error)
+                }
+              }}
+              placeholder="Port"
             />
-          )}
-          {contexts && (
-            <Dropdown
-              margin="1rem 1rem 0 1rem"
-              width="150px"
-              options={contexts.contexts}
-              value={contexts.activeContext}
-              select={setContext}
-              disabled={!multipleCluster}
-            />
-          )}
-        </SSettings>
-      )}
-    </Fragment>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 

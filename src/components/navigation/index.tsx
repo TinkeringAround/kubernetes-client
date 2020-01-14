@@ -20,7 +20,7 @@ const Navigation: FC = () => {
 
   return (
     <Box
-      width={sizes['navigation'] + 'px'}
+      width={sizes['navigation']}
       height="100%"
       background="white"
       style={{ position: 'relative' }}
@@ -42,7 +42,8 @@ const Navigation: FC = () => {
               margin="0 0 .75rem"
               onClick={() => setPage(1)}
             />
-            <Icon type="pod" selected={page === 2} onClick={() => setPage(2)} />
+            <Icon type="pod" selected={page === 2} margin="0 0 .75rem" onClick={() => setPage(2)} />
+            <Icon type="settings" selected={page === 3} onClick={() => setPage(3)} />
           </Fragment>
         )}
       </Box>

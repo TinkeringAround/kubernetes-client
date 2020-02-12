@@ -27,7 +27,11 @@ const AppVersion: FC = () => {
 
   // ==========================================================
   return (
-    <Text size=".6rem" color={colors['black']} style={{ position: 'absolute', bottom: '1rem' }}>
+    <Text
+      size=".6rem"
+      color={colors['black']}
+      style={{ position: 'absolute', bottom: '1rem', cursor: 'default' }}
+    >
       {`v${version}`}
     </Text>
   )

@@ -1,9 +1,9 @@
 const { app } = require('electron')
 
-const root = app.getPath('desktop')
+const root = app.getPath('home')
 // ==============================================================
 module.exports = {
-  CONFIG: root + '/kubeconfig.yaml',
+  CONFIG: root + '/kubernetes-client-config.yaml',
 
   DISABLED_NAMESPACES: 'kube-node-lease kube-public kube-system',
 

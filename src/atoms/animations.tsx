@@ -90,8 +90,7 @@ const SLogDialog = styled(Box)`
   padding: 1.5rem 2rem;
 
   background: ${colors['white']};
-  box-shadow: 0px 0px 20px 1px rgba(200, 214, 216, 0.25);
-  border-radius: 15px;
+  border-radius: 5px;
 
   justify-content: space-between;
 `

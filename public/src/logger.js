@@ -1,4 +1,4 @@
-const { ipcMain } = require('electron')
+const { app, ipcMain } = require('electron')
 
 // ==============================================================
 function logError(error) {
@@ -30,10 +30,10 @@ function getTimestamp() {
 }
 // ==============================================================
 try {
-  console.info(`===> Running K8s-Client Version ${process.env.npm_package_version}`)
+  console.info(`===> Running K8s-Client Version ${app.getVersion()}`)
   ipcMain.on('version', event => {
     event.returnValue = {
-      data: process.env.npm_package_version,
+      data: app.getVersion(),
       error: null
     }
   })
